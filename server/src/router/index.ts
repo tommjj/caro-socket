@@ -1,12 +1,8 @@
 import { Hono } from 'hono';
-import user from './user/user';
+import api from './api';
 
-const api = new Hono().basePath('/api');
+const router = new Hono();
 
-api.get('/', (c) => {
-    return c.text('api');
-});
+router.route('/', api);
 
-api.route('/', user);
-
-export default api;
+export default router;

@@ -9,7 +9,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from './socket';
-import api from './router';
+import router from './router';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -30,7 +30,7 @@ app.use('*', logger());
 
 //----====ROUTE====----\\
 
-app.route('/', api);
+app.route('/', router);
 
 app.get('/', (c) => {
     return c.render(`<!DOCTYPE html>
@@ -84,10 +84,9 @@ app.get('/', (c) => {
         formData.append('name', 'John');
 
         postButton.addEventListener('click', async () => {
-           fetch('/api/users', {
+           fetch('/api/auth/sign-in', {
             method: 'POST',
-
-            body: JSON.stringify({name: 'teo', password: '1234'})
+            body: JSON.stringify({username: 'teo', password: '1234'})
            }).then(e => e.json()).then(e => {console.log(e)})
         })
 

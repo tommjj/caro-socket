@@ -2,7 +2,7 @@ import { Context } from 'hono';
 
 import prisma from '../lib/data/db';
 import { CreateUserSchema } from '../lib/zod.schema';
-import { hash, hashSync } from 'bcrypt';
+import { hashSync } from 'bcrypt';
 
 interface UserControllerInterface {
     createUser(c: Context): Response | Promise<Response>;
@@ -11,6 +11,8 @@ interface UserControllerInterface {
 
 class UserController implements UserControllerInterface {
     async getUser(c: Context) {
+        console.log(c.var.user);
+
         const users = await prisma.user.findMany();
 
         return c.json(users);
