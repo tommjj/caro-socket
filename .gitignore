@@ -1,13 +1,19 @@
-#vs code
+# vs code
 /.vscode/
 
-#server
+# server
 
+## dependencies
 /server/node_modules
 
+## env
 /server/.env
 
-#app
+## prisma
+/server/prisma/migrations/
+/server/prisma/dev.db
+
+# app
 
 # dependencies
 /app/node_modules
@@ -15,32 +21,32 @@
 /app/.pnp.js
 /app/.yarn/install-state.gz
 
-# testing
+## testing
 /app/coverage
 
-# next.js
+## next.js
 /app/.next/
 /app/out/
 
-# production
+## production
 /app/build
 
-# misc
+## misc
 /app/.DS_Store
 /app/*.pem
 
-# debug
+## debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# local env files
+## local env files
 /app/.env*.local
 /app/.env
 
-# vercel
+## vercel
 /app/.vercel
 
-# typescript
+## typescript
 /app/*.tsbuildinfo
 /app/next-env.d.ts

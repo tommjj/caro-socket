@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server';
 import { Server } from 'socket.io';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
+import { Context, Hono } from 'hono';
 import { logger } from 'hono/logger';
 import {
     ClientToServerEvents,
@@ -10,6 +10,8 @@ import {
     SocketData,
 } from './socket';
 import router from './router';
+
+import { getCookieString } from './lib/utils/help-methods';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -78,15 +80,14 @@ app.get('/', (c) => {
         const messages = document.getElementById('messages');
         const toggleConnButton = document.getElementById('conn');
         const postButton = document.getElementById('post');
-        var first = true;
-
-        let formData = new FormData();
-        formData.append('name', 'John');
 
         postButton.addEventListener('click', async () => {
            fetch('/api/auth/sign-in', {
             method: 'POST',
-            body: JSON.stringify({username: 'teo', password: '1234'})
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({username: 'Fiammetta', password: '1234'})
            }).then(e => e.json()).then(e => {console.log(e)})
         })
 
@@ -102,13 +103,6 @@ app.get('/', (c) => {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           if (input.value) {
-            if(first) {
-              socket.emit('set name', input.value);
-              socket.auth.name = input.value;
-              input.value = '';
-              first = false;
-              return;
-            }
             socket.emit('chat message', input.value);
             input.value = '';
           }
@@ -158,23 +152,22 @@ const io = new Server<
 //----====SOCKET====----\\
 
 io.use((socket, next) => {
-    socket.data.age = Date.now();
+    const cookie = getCookieString(socket.request.headers.cookie, 'auth', true);
+
+    if (cookie) {
+        const cookieJson = JSON.parse(cookie);
+        console.log(cookieJson);
+        socket.data.id = cookieJson.id;
+        socket.data.name = cookieJson.name;
+    }
+
     next();
 });
 
 io.on('connect', (socket) => {
     console.log('connect', socket.id);
 
-    socket.on('set name', (name) => {
-        socket.data.name = name;
-    });
-
     socket.on('chat message', (msg) => {
-        console.log('message: ' + socket.handshake.auth.name);
-        console.table({
-            name: socket.data.name,
-            are: socket.data.age,
-        });
         io.emit('chat message', `${socket.data.name}: ${msg}`);
     });
 

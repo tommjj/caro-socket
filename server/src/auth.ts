@@ -1,55 +1,83 @@
 import { Context } from 'hono';
-import { setSignedCookie, deleteCookie, getSignedCookie } from 'hono/cookie';
-import { createMiddleware } from 'hono/factory';
+import {
+    setSignedCookie,
+    deleteCookie,
+    getSignedCookie,
+    getCookie,
+    setCookie,
+} from 'hono/cookie';
+import { Factory, createMiddleware } from 'hono/factory';
 
 import { compareSync } from 'bcrypt';
 import { z } from 'zod';
 import prisma from './lib/data/db';
-
-const SECRET_KEY = process.env.SECRET_KEY || 'SECRET_KEY';
+import { signCookie, unsignCookie } from './lib/utils/help-methods';
+import { zValidator } from '@hono/zod-validator';
 
 const SignInSchema = z.object({
-    username: z.string(),
-    password: z.string(),
+    username: z.coerce.string(),
+    password: z.coerce.string(),
 });
 
-export const signIn = async (c: Context): Promise<Response> => {
-    const body = await c.req.json();
+const factory = new Factory();
 
-    const bodyParse = SignInSchema.safeParse(body);
+export const signInHandlers = factory.createHandlers(
+    zValidator('json', SignInSchema),
+    async (c) => {
+        const { username, password } = c.req.valid('json');
 
-    if (!bodyParse.success) return c.json(undefined, 400);
-    const { username, password } = bodyParse.data;
+        const user = await prisma.user.findUnique({
+            where: { name: username },
+        });
 
-    const user = await prisma.user.findUnique({ where: { name: username } });
-    if (!user) return c.json(undefined, 400);
+        if (!user || !compareSync(password, user.password))
+            return c.json({ message: 'CredentialSignin' }, 401);
 
-    if (compareSync(password, user.password)) {
-        await setSignedCookie(
+        setCookie(
             c,
             'auth',
-            JSON.stringify({ id: user.id, user: username }),
-            SECRET_KEY,
+            signCookie({
+                id: user.id,
+                name: username,
+                expires: Date.now() + 1000 * 60 * 24,
+            }),
             { path: '/', maxAge: 1000 * 60 * 24, httpOnly: true }
         );
 
-        return c.text('ok', 200);
+        return c.json({ message: 'OK' }, 200);
     }
-
-    return c.text('', 400);
-};
+);
 
 export const signOut = (c: Context): Response | Promise<Response> => {
     deleteCookie(c, 'auth');
     return c.json(undefined, 204);
 };
 
-export const auth = createMiddleware(async (c, next) => {
-    const cookie = await getSignedCookie(c, SECRET_KEY, 'auth');
+export const authMiddleware = createMiddleware(async (c, next) => {
+    const cookie = unsignCookie(getCookie(c, 'auth'));
 
     if (cookie) {
-        c.set('user', JSON.parse(cookie));
+        const cookieJson = JSON.parse(cookie);
+        c.set('auth', {
+            user: cookieJson,
+            expired: Date.now() < cookieJson.expires,
+        });
     }
 
     await next();
 });
+
+export const auth = (c: Context) => {
+    const cookie = unsignCookie(getCookie(c, 'auth'));
+
+    if (cookie) {
+        const cookieJson = JSON.parse(cookie);
+        return {
+            ...cookieJson,
+        } as {
+            id: string;
+            name: string;
+        };
+    }
+    return undefined;
+};

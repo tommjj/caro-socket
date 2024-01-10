@@ -1,10 +1,12 @@
 import { Hono } from 'hono';
-import { userController } from '../../../controllers/userController';
-import { auth } from '../../../auth';
+import {
+    createUserHandlers,
+    getUserHandlers,
+} from '../../../controllers/user-controller';
 
 const userRoute = new Hono().basePath('/users');
 
-userRoute.get('/', auth, userController.getUser);
-userRoute.post('/', userController.createUser);
+userRoute.get('/', ...getUserHandlers);
+userRoute.post('/', ...createUserHandlers);
 
 export default userRoute;

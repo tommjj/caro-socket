@@ -11,7 +11,7 @@ export type User = z.infer<typeof UserSchema>;
 
 export const CreateUserSchema = z.object({
     name: z.string(),
-    password: z.string(),
+    password: z.coerce.string(),
     avatar: z.string().default('default_avatar.png'),
 });
 export type CreateUser = z.infer<typeof CreateUserSchema>;
