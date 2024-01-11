@@ -1,11 +1,5 @@
 import { Context } from 'hono';
-import {
-    setSignedCookie,
-    deleteCookie,
-    getSignedCookie,
-    getCookie,
-    setCookie,
-} from 'hono/cookie';
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { Factory, createMiddleware } from 'hono/factory';
 
 import { compareSync } from 'bcrypt';

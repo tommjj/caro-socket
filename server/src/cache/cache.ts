@@ -1,5 +1,16 @@
 import NodeCache = require('node-cache');
 
-const gameCache = new NodeCache({ useClones: false });
+class GameCache {
+    private cache;
 
-export default gameCache;
+    constructor(cache?: NodeCache) {
+        this.cache = cache || new NodeCache({ useClones: false });
+    }
+
+    get getCache() {
+        return this.cache;
+    }
+}
+
+export const gameCache = new GameCache();
+export default GameCache;
