@@ -9,6 +9,8 @@ export interface ClientToServerEvents {
     hello: () => void;
     'chat message': (msg: string) => void;
     'set name': (name: string) => void;
+    'find match': () => void;
+    'cancel find match': () => void;
 }
 
 export interface InterServerEvents {

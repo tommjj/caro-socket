@@ -22,12 +22,21 @@ export const createUserHandlers = factory.createHandlers(
     async (c) => {
         const user = c.req.valid('json');
 
-        await prisma.user.create({
-            data: {
-                ...user,
-                password: hashSync(user.password, 10),
-            },
-        });
+        try {
+            await prisma.user.create({
+                data: {
+                    ...user,
+                    password: hashSync(user.password, 10),
+                },
+            });
+        } catch (error) {
+            return c.json(
+                {
+                    message: 'user name is existed!',
+                },
+                409
+            );
+        }
 
         return c.json(
             {

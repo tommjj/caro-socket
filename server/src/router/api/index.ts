@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
-import userRoute from './user/user';
-import authRoute from './auth/auth';
+import userRoute from '@/router/api/user/user';
+import authRoute from '@/router/api/auth/auth';
 
 const api = new Hono().basePath('/api');
 

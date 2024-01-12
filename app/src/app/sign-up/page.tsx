@@ -1,4 +1,4 @@
-import { SignInForm } from '@/components/sign-in-up-form';
+import { SignUpForm } from '@/components/sign-in-up-form';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export default function SignInPage() {
     return (
         <main className="flex h-svh w-screen">
             <div className="w-full md:w-6/12 h-full flex justify-center items-center ">
-                <SignInForm />
+                <SignUpForm />
             </div>
             <div className="w-6/12 h-full justify-center items-center hidden md:flex">
                 <div className="w-[453px] h-[453px] relative">

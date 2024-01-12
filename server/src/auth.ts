@@ -1,12 +1,12 @@
 import { Context } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { Factory, createMiddleware } from 'hono/factory';
+import { zValidator } from '@hono/zod-validator';
 
 import { compareSync } from 'bcrypt';
 import { z } from 'zod';
-import prisma from './lib/data/db';
-import { signCookie, unsignCookie } from './lib/utils/help-methods';
-import { zValidator } from '@hono/zod-validator';
+import prisma from '@/lib/data/db';
+import { signCookie, unsignCookie } from '@/lib/utils/help-methods';
 
 const SignInSchema = z.object({
     username: z.coerce.string(),
