@@ -27,3 +27,11 @@ export const getCookieString = (
 
     return secret ? unsignCookie(cookieData) : cookieData;
 };
+
+export const base64 = (str: string) => {
+    return Buffer.from(str).toString('base64');
+};
+
+export const unBase64 = (str: string) => {
+    return Buffer.from(str, 'base64').toString('ascii');
+};

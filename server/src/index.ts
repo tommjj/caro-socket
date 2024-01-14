@@ -3,7 +3,6 @@ import { Server } from 'socket.io';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import { cors } from 'hono/cors';
 
 import {
     ClientToServerEvents,
@@ -15,8 +14,9 @@ import router from '@/router';
 
 import { getCookieString } from '@/lib/utils/help-methods';
 import { html } from 'hono/html';
-import { auth } from '@/auth';
+import { auth, parseToken } from '@/auth';
 import Queue from '@/lib/queue';
+import { CORS } from './lib/utils/constant';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -126,7 +126,11 @@ app.get('/', (c) => {
 
                 <script src="/socket.io/socket.io.js"></script>
                 <script>
-                    const socket = io({ auth: { name: '' } });
+                    const socket = io({
+                        auth: {
+                            token: 'eyJpZCI6IjQzOGVhM2FjLWE5NTYtNDk0NC1hODQ0LTU5NjI4YzIxZDlmNiIsIm5hbWUiOiJGaWFtbWV0dGEiLCJhdmF0YXIiOiJkZWZhdWx0X2F2YXRhci5wbmciLCJleHBpcmVzIjoxNzA1Mjg5NDI0NTYwfQ==.LjoSRKIS7PO5BLYumEqQAWib/vGI6e7GPMJ0RTPJ8zQ',
+                        },
+                    });
 
                     const form = document.getElementById('form');
                     const input = document.getElementById('input');
@@ -207,21 +211,23 @@ const io = new Server<
     SocketData
 >(server, {
     connectionStateRecovery: {},
-    cors: { origin: ['http://localhost:3000', 'http://localhost:8080'] },
+    cors: { origin: CORS },
 });
 
 //----====SOCKET====----\\
 
 const matchQueue = new Queue<{ userId: string; socketId: string }>();
+let ping = 0;
 
 io.use((socket, next) => {
-    const cookie = getCookieString(socket.request.headers.cookie, 'auth', true);
+    const payload = parseToken(socket.handshake.auth.token);
 
-    if (!cookie) return socket._error('invalid credentials');
+    if (!payload) return socket._error('invalid credentials');
 
-    const cookieJson = JSON.parse(cookie);
-    socket.data.id = cookieJson.id;
-    socket.data.name = cookieJson.name;
+    console.log(payload);
+
+    socket.data.id = payload.id;
+    socket.data.name = payload.name;
     next();
 });
 
@@ -244,3 +250,8 @@ io.on('connect', (socket) => {
         console.log('disconnect:', socket.id);
     });
 });
+
+setInterval(() => {
+    io.emit('ping', ping);
+    ping++;
+}, 1000);

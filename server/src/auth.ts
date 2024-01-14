@@ -6,7 +6,12 @@ import { zValidator } from '@hono/zod-validator';
 import { compareSync } from 'bcrypt';
 import { z } from 'zod';
 import prisma from '@/lib/data/db';
-import { signCookie, unsignCookie } from '@/lib/utils/help-methods';
+import {
+    base64,
+    signCookie,
+    unBase64,
+    unsignCookie,
+} from '@/lib/utils/help-methods';
 
 const SignInSchema = z.object({
     username: z.coerce.string(),
@@ -14,6 +19,19 @@ const SignInSchema = z.object({
 });
 
 const factory = new Factory();
+
+export const authHandlers = factory.createHandlers((c) => {
+    const user = auth(c);
+    if (user) return c.json(user, 200);
+    return c.json('CredentialSignin', 401);
+});
+
+export const getTokenHandlers = factory.createHandlers((c) => {
+    const user = auth(c);
+    if (user)
+        return c.json({ token: createToken(user, 1000 * 60 * 60 * 24) }, 200);
+    return c.json('CredentialSignin', 401);
+});
 
 export const signInHandlers = factory.createHandlers(
     zValidator('json', SignInSchema),
@@ -27,18 +45,32 @@ export const signInHandlers = factory.createHandlers(
         if (!user || !compareSync(password, user.password))
             return c.json({ message: 'CredentialSignin' }, 401);
 
+        const payload = {
+            id: user.id,
+            name: user.name,
+            avatar: user.avatar,
+        };
+
         setCookie(
             c,
             'auth',
             signCookie({
-                id: user.id,
-                name: username,
-                expires: Date.now() + 1000 * 60 * 24,
+                ...payload,
+                expires: Date.now() + 1000 * 60 * 60 * 24,
             }),
-            { path: '/', maxAge: 1000 * 60 * 24, httpOnly: true }
+            {
+                path: '/',
+                maxAge: 1000 * 60 * 60 * 24,
+                httpOnly: true,
+            }
         );
 
-        return c.json({ message: 'OK' }, 200);
+        return c.json(
+            {
+                token: createToken(payload, 1000 * 60 * 60 * 24),
+            },
+            200
+        );
     }
 );
 
@@ -74,4 +106,25 @@ export const auth = (c: Context) => {
         };
     }
     return undefined;
+};
+
+export const createToken = (payload: object, expires: number) => {
+    return signCookie(
+        base64(
+            JSON.stringify({
+                ...payload,
+                expires: Date.now() + expires,
+            })
+        )
+    );
+};
+
+export const parseToken = (token: string) => {
+    const t = unsignCookie(token);
+    if (!t) return undefined;
+
+    const payload = JSON.parse(unBase64(token));
+    if (payload.expires < Date.now()) return false;
+
+    return payload;
 };
