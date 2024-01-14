@@ -3,7 +3,6 @@
 import {
     ChangeEventHandler,
     FormEventHandler,
-    HTMLInputTypeAttribute,
     useCallback,
     useState,
 } from 'react';
@@ -35,7 +34,7 @@ export const Input = ({
             <input
                 id={id}
                 className={cn(
-                    'py-2 w-full border rounded-md text-lg px-2 mt-2',
+                    'py-2 w-full border rounded-md text-lg px-2 mt-2 bg-gray border-none',
                     className
                 )}
                 {...props}
@@ -77,10 +76,13 @@ export const SignInForm = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
+            credentials: 'include',
             method: 'POST',
             body: JSON.stringify(formState),
         }).then((e) => {
-            if (e.ok) return push('/');
+            if (e.ok) {
+                return push('/');
+            }
             setFormState((s) => ({ ...s, err: true }));
         });
     };
@@ -88,18 +90,18 @@ export const SignInForm = () => {
     return (
         <>
             <form
-                className="w-[420px] text-[#111827]"
+                className="w-[420px] text-white"
                 action=""
                 onSubmit={handleSubmit}
             >
-                <div>
-                    <Logo className="text-blue-500" />
-                    <h1 className="mt-8 text-4xl font-bold ">
+                <div className="text-white">
+                    <Logo className="text-light" />
+                    <h1 className="mt-8 text-4xl font-bold tracking-tight">
                         Sign in to your account
                     </h1>
                     <p>
                         Do not have an account?{' '}
-                        <Link href={'sign-up'} className="text-blue-500">
+                        <Link href={'sign-up'} className="text-light">
                             create an account
                         </Link>
                     </p>
@@ -125,12 +127,12 @@ export const SignInForm = () => {
                     />
 
                     <div className="w-full text-right py-1 px-1">
-                        <a className="text-blue-500">forget password?</a>
+                        <a className="text-light">forget password?</a>
                     </div>
                     <div className="mt-7">
                         <button
                             type="submit"
-                            className="py-2 w-full border rounded-md text-lg px-5 mt-2 text-white bg-blue-500"
+                            className="py-2 w-full border rounded-md text-lg px-5 mt-2 text-white bg-light border-none"
                         >
                             Sign in
                         </button>
@@ -213,18 +215,18 @@ export const SignUpForm = () => {
     return (
         <>
             <form
-                className="w-[420px] text-[#111827]"
+                className="w-[420px] text-white"
                 action=""
                 onSubmit={handleSubmit}
             >
                 <div>
-                    <Logo className="text-blue-500" />
+                    <Logo className="" />
                     <h1 className="mt-8 text-4xl font-bold ">
                         Create an account
                     </h1>
                     <p>
                         Do you already have an account?{' '}
-                        <Link href={'/sign-in'} className="text-blue-500">
+                        <Link href={'/sign-in'} className="text-light">
                             sign in
                         </Link>
                     </p>
@@ -266,7 +268,7 @@ export const SignUpForm = () => {
                     <div className="mt-10">
                         <button
                             type="submit"
-                            className="py-2 w-full border rounded-md text-lg px-5 mt-2 text-white bg-blue-500"
+                            className="py-2 w-full border rounded-md text-lg px-5 mt-2 text-white bg-light border-none"
                         >
                             Sign up
                         </button>

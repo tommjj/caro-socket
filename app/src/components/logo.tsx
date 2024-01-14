@@ -1,3 +1,5 @@
+'use client';
+
 import TicTacToeSVG from '../../public/tic-tac-toe-game-svgrepo-com.svg';
 import Image from 'next/image';
 

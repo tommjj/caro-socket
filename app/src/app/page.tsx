@@ -1,5 +1,9 @@
-import { Button } from '@/components/ui/button';
+import Game from '@/components/game';
 
 export default function Home() {
-    return <Button>Click me!</Button>;
+    return (
+        <main className="w-screen h-screen overflow-hidden">
+            <Game />
+        </main>
+    );
 }
