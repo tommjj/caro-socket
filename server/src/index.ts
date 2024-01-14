@@ -12,7 +12,6 @@ import {
 } from '@/socket';
 import router from '@/router';
 
-import { getCookieString } from '@/lib/utils/help-methods';
 import { html } from 'hono/html';
 import { auth, parseToken } from '@/auth';
 import Queue from '@/lib/queue';
@@ -216,7 +215,10 @@ const io = new Server<
 
 //----====SOCKET====----\\
 
-const matchQueue = new Queue<{ userId: string; socketId: string }>();
+const matchQueue3x3 = new Queue<{ userId: string }>();
+const matchQueue5x5 = new Queue<{ userId: string }>();
+const matchQueue7x7 = new Queue<{ userId: string }>();
+
 let ping = 0;
 
 io.use((socket, next) => {
@@ -235,11 +237,27 @@ io.on('connect', (socket) => {
     console.log('connect', socket.id);
     socket.join(socket.data.id);
 
-    socket.on('find match', () => {
-        matchQueue.offer({ userId: socket.data.id, socketId: socket.id });
+    socket.on('find match', (mode) => {
+        switch (mode) {
+            case 3:
+                matchQueue3x3.offer({ userId: socket.data.id });
+                break;
+            case 5:
+                matchQueue5x5.offer({ userId: socket.data.id });
+                break;
+            case 7:
+                matchQueue7x7.offer({ userId: socket.data.id });
+                break;
+            default:
+                break;
+        }
+        console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
+        //matchQueue.offer({ userId: socket.data.id, socketId: socket.id });
     });
     socket.on('cancel find match', () => {
-        matchQueue.remove((e) => e.userId === socket.data.id);
+        matchQueue3x3.remove((e) => e.userId === socket.data.id);
+        matchQueue5x5.remove((e) => e.userId === socket.data.id);
+        matchQueue7x7.remove((e) => e.userId === socket.data.id);
     });
 
     socket.on('chat message', (msg) => {
