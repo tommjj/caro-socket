@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { toast } from './ui/use-toast';
+import { http } from '@/lib/http';
 
 interface InputProps extends React.HTMLProps<HTMLInputElement> {
     containerClassName?: string;
@@ -69,22 +70,17 @@ export const SignInForm = () => {
             }));
         }, []);
 
-    const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
 
-        fetch(`${process.env.NEXT_PUBLIC_ORIGIN_API}/api/auth/sign-in`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            credentials: 'include',
+        const [res, _] = await http.post.json('/api/auth/sign-in', formState, {
             method: 'POST',
-            body: JSON.stringify(formState),
-        }).then((e) => {
-            if (e.ok) {
-                return push('/');
-            }
-            setFormState((s) => ({ ...s, err: true }));
         });
+
+        if (res && res.ok) {
+            return push('/');
+        }
+        setFormState((s) => ({ ...s, err: true }));
     };
 
     return (
@@ -184,32 +180,26 @@ export const SignUpForm = () => {
             }));
         }, []);
 
-    const handleSubmit: FormEventHandler<HTMLFormElement> = (e) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
 
         if (formState.password !== formState.confirm)
             return setFormState((s) => ({ ...s, err: 'password' }));
 
-        fetch(`${process.env.NEXT_PUBLIC_ORIGIN_API}/api/users`, {
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            method: 'POST',
-            body: JSON.stringify({
-                name: formState.username,
-                password: formState.password,
-            }),
-        }).then((e) => {
-            if (e.ok) {
-                toast({
-                    title: 'Account created',
-                    description: new Date().toUTCString(),
-                    variant: 'success',
-                });
-                return push('/sign-in');
-            }
-            setFormState((s) => ({ ...s, err: 'username' }));
+        const [res, err] = await http.post.json('/api/users', {
+            name: formState.username,
+            password: formState.password,
         });
+
+        if (!res || !res.ok)
+            return setFormState((s) => ({ ...s, err: 'username' }));
+
+        toast({
+            title: 'Account created',
+            description: new Date().toUTCString(),
+            variant: 'success',
+        });
+        return push('/sign-in');
     };
 
     return (

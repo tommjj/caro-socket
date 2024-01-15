@@ -12,6 +12,7 @@ import {
     unBase64,
     unsignCookie,
 } from '@/lib/utils/help-methods';
+import { DOMAIN } from './lib/utils/constant';
 
 const SignInSchema = z.object({
     username: z.coerce.string(),
@@ -59,6 +60,7 @@ export const signInHandlers = factory.createHandlers(
                 expires: Date.now() + 1000 * 60 * 60 * 24,
             }),
             {
+                domain: DOMAIN,
                 path: '/',
                 maxAge: 1000 * 60 * 60 * 24,
                 httpOnly: true,

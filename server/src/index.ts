@@ -1,8 +1,8 @@
 import { serve } from '@hono/node-server';
-import { Server } from 'socket.io';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
+import { html } from 'hono/html';
 
 import {
     ClientToServerEvents,
@@ -11,11 +11,10 @@ import {
     SocketData,
 } from '@/socket';
 import router from '@/router';
-
-import { html } from 'hono/html';
+import { Server } from 'socket.io';
 import { auth, parseToken } from '@/auth';
 import Queue from '@/lib/queue';
-import { CORS } from './lib/utils/constant';
+import { CORS } from '@/lib/utils/constant';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -210,7 +209,7 @@ const io = new Server<
     SocketData
 >(server, {
     connectionStateRecovery: {},
-    cors: { origin: CORS },
+    cors: { origin: CORS, credentials: true },
 });
 
 //----====SOCKET====----\\
@@ -252,12 +251,13 @@ io.on('connect', (socket) => {
                 break;
         }
         console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
-        //matchQueue.offer({ userId: socket.data.id, socketId: socket.id });
     });
     socket.on('cancel find match', () => {
         matchQueue3x3.remove((e) => e.userId === socket.data.id);
         matchQueue5x5.remove((e) => e.userId === socket.data.id);
         matchQueue7x7.remove((e) => e.userId === socket.data.id);
+
+        console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
     });
 
     socket.on('chat message', (msg) => {
@@ -265,6 +265,9 @@ io.on('connect', (socket) => {
     });
 
     socket.on('disconnect', () => {
+        matchQueue3x3.remove((e) => e.userId === socket.data.id);
+        matchQueue5x5.remove((e) => e.userId === socket.data.id);
+        matchQueue7x7.remove((e) => e.userId === socket.data.id);
         console.log('disconnect:', socket.id);
     });
 });

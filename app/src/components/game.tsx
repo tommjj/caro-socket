@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from './provider';
 import useGameStore, { setGameStore } from '@/lib/store/store';
 import socket, { connectSocket } from '@/lib/socket';
 import { http } from '@/lib/http';
 import { UserTopBar } from './user-bar';
 import { useRouter } from 'next/navigation';
-import { ModeDisplay } from './set-mod-botton';
+import { ModeDisplay } from './set-mod-button';
 import { Counter } from './counter';
 import { cn } from '@/lib/utils';
 
@@ -30,7 +29,8 @@ const Game = () => {
     useEffect(() => {
         (async () => {
             if (!socket.connected) {
-                connectSocket(await http.getToken());
+                const token = await http.getToken();
+                if (token) connectSocket(token);
             }
         })();
         return () => {};
@@ -76,7 +76,7 @@ const Game = () => {
             <ModeDisplay />
             <Counter />
             <button
-                onClick={() => {
+                onClick={async () => {
                     if (findMatch) {
                         socket.emit('cancel find match');
                         setGameStore((p) => ({ findMatch: false }));
