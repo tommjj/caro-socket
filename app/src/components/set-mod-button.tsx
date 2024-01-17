@@ -15,7 +15,7 @@ export const ModeDisplay = () => {
     }, [setMode]);
 
     return (
-        <div className="flex flex-col justify-end absolute left-0 bottom-12 h-5/6">
+        <div className="flex flex-col justify-end absolute left-0 bottom-12 h-5/6 z-10">
             <div className="absolute left-11 top-[10%] z-0">
                 <div className="flex justify-evenly absolute top-0 left-0 w-[500px] h-[500px]">
                     {Array.from({ length: mode - 1 }, (x, i) => (
@@ -34,7 +34,7 @@ export const ModeDisplay = () => {
                     ))}
                 </div>
             </div>
-            <div className="relative text-[200px] leading-none font-semibold text-white pl-5">
+            <div className="relative text-[200px] leading-none select-none font-semibold text-white pl-5">
                 {`${mode}`}
                 <span className="text-6xl">X</span>
                 {`${mode}`}

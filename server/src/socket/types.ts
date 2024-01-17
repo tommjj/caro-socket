@@ -1,13 +1,15 @@
+import { GameMode } from '@/lib/match';
+
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
+    matched: () => void;
     ping: (p: number) => void;
 }
 
 export interface ClientToServerEvents {
-    hello: () => void;
     'chat message': (msg: string) => void;
     'set name': (name: string) => void;
-    'find match': (mode: number) => void;
+    'find match': (mode: GameMode) => void;
     'cancel find match': () => void;
 }
 

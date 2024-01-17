@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
+
 import Game from '@/components/game';
+
+export const metadata: Metadata = {
+    title: 'caro',
+};
 
 export default function Home() {
     return (

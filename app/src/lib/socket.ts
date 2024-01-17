@@ -1,20 +1,17 @@
 'use client';
 
 import { Socket, io } from 'socket.io-client';
-import useGameStore, { setGameStore } from './store/store';
+import { setGameStore } from './store/store';
 
 export interface ServerToClientEvents {
-    noArg: () => void;
-    basicEmit: (a: number, b: string, c: Buffer) => void;
-    withAck: (d: string, callback: (e: number) => void) => void;
     'chat message': (msg: string) => void;
     ping: (p: number) => void;
+    matched: () => void;
 }
 
 export interface ClientToServerEvents {
     hello: () => void;
     'chat message': (msg: string) => void;
-    'set name': (name: string) => void;
     'find match': (mode: number) => void;
     'cancel find match': () => void;
 }
@@ -29,6 +26,10 @@ socket.on('ping', (p) => {
         e.setPing(p);
         return {};
     });
+});
+
+socket.on('matched', () => {
+    console.log('matched');
 });
 
 export const connectSocket = (auth: { token: string }) => {

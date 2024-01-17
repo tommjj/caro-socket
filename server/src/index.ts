@@ -9,12 +9,13 @@ import {
     InterServerEvents,
     ServerToClientEvents,
     SocketData,
-} from '@/socket';
+} from '@/socket/types';
 import router from '@/router';
 import { Server } from 'socket.io';
 import { auth, parseToken } from '@/auth';
 import Queue from '@/lib/queue';
 import { CORS } from '@/lib/utils/constant';
+import GameQueue from './lib/game-queue';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -214,9 +215,9 @@ const io = new Server<
 
 //----====SOCKET====----\\
 
-const matchQueue3x3 = new Queue<{ userId: string }>();
-const matchQueue5x5 = new Queue<{ userId: string }>();
-const matchQueue7x7 = new Queue<{ userId: string }>();
+const matchQueue3x3 = new GameQueue(io);
+const matchQueue5x5 = new GameQueue(io);
+const matchQueue7x7 = new GameQueue(io);
 
 let ping = 0;
 
@@ -224,8 +225,6 @@ io.use((socket, next) => {
     const payload = parseToken(socket.handshake.auth.token);
 
     if (!payload) return socket._error('invalid credentials');
-
-    console.log(payload);
 
     socket.data.id = payload.id;
     socket.data.name = payload.name;
@@ -239,23 +238,24 @@ io.on('connect', (socket) => {
     socket.on('find match', (mode) => {
         switch (mode) {
             case 3:
-                matchQueue3x3.offer({ userId: socket.data.id });
+                matchQueue3x3.offer(socket.data.id);
                 break;
             case 5:
-                matchQueue5x5.offer({ userId: socket.data.id });
+                matchQueue5x5.offer(socket.data.id);
                 break;
             case 7:
-                matchQueue7x7.offer({ userId: socket.data.id });
+                matchQueue7x7.offer(socket.data.id);
                 break;
             default:
                 break;
         }
         console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
     });
+
     socket.on('cancel find match', () => {
-        matchQueue3x3.remove((e) => e.userId === socket.data.id);
-        matchQueue5x5.remove((e) => e.userId === socket.data.id);
-        matchQueue7x7.remove((e) => e.userId === socket.data.id);
+        matchQueue3x3.remove((e) => e === socket.data.id);
+        matchQueue5x5.remove((e) => e === socket.data.id);
+        matchQueue7x7.remove((e) => e === socket.data.id);
 
         console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
     });
@@ -265,9 +265,9 @@ io.on('connect', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        matchQueue3x3.remove((e) => e.userId === socket.data.id);
-        matchQueue5x5.remove((e) => e.userId === socket.data.id);
-        matchQueue7x7.remove((e) => e.userId === socket.data.id);
+        matchQueue3x3.remove((e) => e === socket.data.id);
+        matchQueue5x5.remove((e) => e === socket.data.id);
+        matchQueue7x7.remove((e) => e === socket.data.id);
         console.log('disconnect:', socket.id);
     });
 });

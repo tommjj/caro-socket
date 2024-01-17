@@ -1,58 +1,37 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import useGameStore, { setGameStore } from '@/lib/store/store';
-import socket, { connectSocket } from '@/lib/socket';
 import { http } from '@/lib/http';
-import { UserTopBar } from './user-bar';
+import useGameStore from '@/lib/store/store';
 import { useRouter } from 'next/navigation';
-import { ModeDisplay } from './set-mod-button';
-import { Counter } from './counter';
-import { cn } from '@/lib/utils';
+import { useEffect } from 'react';
+import GameMenu from './game-menu';
 
-const Ping = () => {
-    const ping = useGameStore((s) => s.ping);
-
+const Loading = () => {
     return (
-        <div className="absolute top-0 left-0 text-light select-none">
-            ping: {ping}
+        <div className="flex justify-center items-center w-full h-full relative bg-dark">
+            {/* <div className="w-[553px] h-[553px] absolute z-0">
+                <span className="block w-[18px] h-full -translate-x-1/2 origin-center rotate-12 rounded-full absolute left-1/3 bg-gray"></span>
+                <span className="block w-[18px] h-full -translate-x-1/2 origin-center rotate-12 rounded-full absolute left-2/3 bg-gray"></span>
+
+                <span className="block w-full h-[18px] -translate-y-1/2 translate-x-4 rounded-full absolute top-1/3 bg-gray"></span>
+                <span className="block w-full h-[18px] -translate-y-1/2 -translate-x-4 rounded-full absolute top-2/3 bg-gray"></span>
+            </div> */}
+
+            <div className="absolute w-[600px] h-[600px] shadow-[0_0_120px] shadow-light rounded-full animate-ping z-0"></div>
+            <div className="text-[300px] text-light font-bold relative z-10">
+                X-O
+            </div>
+            <span className="absolute right-6 bottom-4 select-none text-end text-3xl font-bold text-gray z-10 animate-pulse">
+                Loading...
+            </span>
         </div>
     );
 };
 
 const Game = () => {
+    const user = useGameStore((s) => s.user);
     const setUser = useGameStore((s) => s.setUser);
-    const findMatch = useGameStore((s) => s.findMatch);
-    const mode = useGameStore((s) => s.mode);
     const { push } = useRouter();
-
-    useEffect(() => {
-        (async () => {
-            if (!socket.connected) {
-                const token = await http.getToken();
-                if (token) connectSocket(token);
-            }
-        })();
-        return () => {};
-    }, []);
-
-    useEffect(() => {
-        const handleMess = () => {
-            console.log('connected');
-        };
-
-        const handleConnect = (message: string) => {
-            console.log(message);
-        };
-
-        socket.on('connect', handleMess);
-        socket.on('chat message', handleConnect);
-
-        return () => {
-            socket.off('connect', handleMess);
-            socket.off('chat message', handleConnect);
-        };
-    }, []);
 
     useEffect(() => {
         (async () => {
@@ -65,35 +44,7 @@ const Game = () => {
         })();
     }, [setUser, push]);
 
-    return (
-        <div
-            className={cn('w-full h-full relative bg-dark ', {
-                'pointer-events-none': findMatch,
-            })}
-        >
-            <Ping />
-            <UserTopBar />
-            <ModeDisplay />
-            <Counter />
-            <button
-                onClick={async () => {
-                    if (findMatch) {
-                        socket.emit('cancel find match');
-                        setGameStore((p) => ({ findMatch: false }));
-                    } else {
-                        socket.emit('find match', mode);
-                        setGameStore((p) => ({ findMatch: true }));
-                    }
-                }}
-                className="flex items-center absolute right-0 px-9  bottom-12 bg-light  text-dark text-6xl font-semibold h-28 w-96 shadow-md shadow-gray translate-x-2 hover:translate-x-0 transition-all pointer-events-auto"
-            >
-                {/* <div className="h-[100px] w-[100px] bg-white rounded-full ml-[6px] mr-8 p-2 shadow-md shadow-dark">
-                    <div className="w-full h-full rounded-full bg-light"></div>
-                </div>{' '} */}
-                {findMatch ? 'CANCEL' : 'START'}
-            </button>
-        </div>
-    );
+    return <>{user ? <GameMenu /> : <Loading />}</>;
 };
 
 export default Game;

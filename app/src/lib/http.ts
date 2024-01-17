@@ -42,6 +42,28 @@ const createMethods = (
             return [undefined, error];
         }
     };
+
+    method.formData = async (
+        path: string = '',
+        body: FormData,
+        requestInit: RequestInit = init
+    ): Promise<[undefined, unknown] | [Response, undefined]> => {
+        try {
+            const res = await fetch(`${dfPath}${path}`, {
+                ...init,
+                ...requestInit,
+                headers: {
+                    ...init.headers,
+                    ...requestInit.headers,
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: body,
+            });
+            return [res, undefined];
+        } catch (error) {
+            return [undefined, error];
+        }
+    };
     return method;
 };
 
@@ -66,7 +88,7 @@ class Http extends Fetcher {
     }
 
     async getToken(): Promise<{ token: string } | undefined> {
-        const [res, err] = await this.get('/api/auth/token');
+        const [res] = await this.get('/api/auth/token');
 
         if (!res) return undefined;
         if (res.ok) {
@@ -76,7 +98,7 @@ class Http extends Fetcher {
     }
 
     async getUser(): Promise<User | undefined> {
-        const [res, err] = await this.get('/api/auth');
+        const [res] = await this.get('/api/auth');
         if (!res) return undefined;
         if (res.ok) {
             return (await res.json()) as User;
