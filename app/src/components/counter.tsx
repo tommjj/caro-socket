@@ -24,7 +24,7 @@ export const Counter = () => {
     return (
         <div
             className={cn(
-                'text-[200px] fixed right-0 top-1/2 -translate-y-1/2 font-semibold text-gray px-5 transition-all ',
+                'text-[200px] fixed right-0 top-1/2 -translate-y-1/2 font-medium text-gray px-5 transition-all ',
                 { 'text-white text-[256px]': findMatch }
             )}
         >
@@ -51,10 +51,9 @@ export const Counter = () => {
                 ></div>
             </div>
 
-            <div className="z-10 relative">
-                {' '}
+            <div className="z-10 relative select-none">
                 {count}
-                <span className="text-2xl">s</span>
+                <span className="text-2xl">/s</span>
             </div>
         </div>
     );

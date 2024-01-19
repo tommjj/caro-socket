@@ -1,6 +1,7 @@
 import { User } from './zod.schema';
 
-const host = process.env.NEXT_PUBLIC_ORIGIN_API || 'http://localhost:8080';
+export const API_HOST =
+    process.env.NEXT_PUBLIC_ORIGIN_API || 'http://localhost:8080';
 
 const createMethods = (
     dfPath: string | URL | Request = '',
@@ -107,5 +108,5 @@ class Http extends Fetcher {
     }
 }
 
-export const fetcher = new Fetcher(host, { credentials: 'include' });
-export const http = new Http(host, { credentials: 'include' });
+export const fetcher = new Fetcher(API_HOST, { credentials: 'include' });
+export const http = new Http(API_HOST, { credentials: 'include' });

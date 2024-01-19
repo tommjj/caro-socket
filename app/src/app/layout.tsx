@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { nunito, roboto, montserratAlternates } from '@/components/fonts';
+import { montserratAlternates } from '@/components/fonts';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/components/provider';

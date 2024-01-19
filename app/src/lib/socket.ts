@@ -2,11 +2,12 @@
 
 import { Socket, io } from 'socket.io-client';
 import { setGameStore } from './store/store';
+import { API_HOST } from './http';
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
     ping: (p: number) => void;
-    matched: () => void;
+    matched: (roomId: string) => void;
 }
 
 export interface ClientToServerEvents {
@@ -17,19 +18,16 @@ export interface ClientToServerEvents {
 }
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-    'http://localhost:8080',
+    API_HOST,
     { autoConnect: false }
 );
 
 socket.on('ping', (p) => {
+    const ping = Date.now() - p;
     setGameStore((e) => {
-        e.setPing(p);
+        e.setPing(ping);
         return {};
     });
-});
-
-socket.on('matched', () => {
-    console.log('matched');
 });
 
 export const connectSocket = (auth: { token: string }) => {
