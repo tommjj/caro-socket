@@ -2,7 +2,7 @@ import { GameMode } from '@/lib/match';
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
-    matched: () => void;
+    matched: (roomId: string) => void;
     ping: (p: number) => void;
 }
 

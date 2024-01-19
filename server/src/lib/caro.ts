@@ -13,13 +13,18 @@ export default class Caro {
     private lengthToWin;
     private board;
     private currentPlayer = Point.X;
+    private winner: null | Point = null;
     constructor(width: number, height: number, lengthToWin: number = 4) {
         this.width = width;
         this.height = height;
         this.lengthToWin = lengthToWin;
-        this.board = Array<Array<undefined | Point>>(width).fill(
-            Array<undefined | Point>(height).fill(undefined)
-        );
+
+        this.board = new Array<Array<undefined | Point>>(width);
+        for (let i = 0; i < width; i++) {
+            this.board[i] = new Array<undefined | Point>(height).fill(
+                undefined
+            );
+        }
     }
 
     get CurrentPlayer() {
@@ -30,7 +35,13 @@ export default class Caro {
         return this.board;
     }
 
+    get Winner() {
+        return this.winner;
+    }
+
     getPoint(x: number, y: number) {
+        if (!this.isInBoard(x, y)) return undefined;
+
         return this.Board[x][y];
     }
 
@@ -38,12 +49,12 @@ export default class Caro {
         return this.board[x][y] !== undefined;
     }
 
-    inInBoard(x: number, y: number) {
-        return x > 0 && x < this.width && y > 0 && y < this.height;
+    isInBoard(x: number, y: number) {
+        return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
     place(x: number, y: number) {
-        if (this.isOccupied(x, y) || !this.inInBoard(x, y)) {
+        if (this.isOccupied(x, y) || !this.isInBoard(x, y)) {
             return false;
         }
 
@@ -52,12 +63,80 @@ export default class Caro {
         return true;
     }
 
-    checkWinner(x: number, y: number) {}
+    timeOut() {
+        this.winner = this.currentPlayer === Point.X ? Point.O : Point.X;
+    }
+
+    checkWinner(x: number, y: number) {
+        const p = this.getPoint(x, y);
+        if (!p) return;
+        console.log('p:', p);
+        let xx = {
+            count: 0,
+            offset: 0,
+        };
+        let yy = {
+            count: 0,
+            offset: 0,
+        };
+        let xy = {
+            count: 0,
+            offset: 0,
+        };
+        let yx = {
+            count: 0,
+            offset: 0,
+        };
+
+        console.log('board:', this.Board);
+
+        for (let i = 1; i <= this.lengthToWin; i++) {
+            if (this.getPoint(x + (i + xx.offset), y) === p) {
+                xx.count = xx.count + 1;
+            } else {
+                xx.offset = -this.lengthToWin - 1;
+            }
+
+            if (this.getPoint(x, y + (i + yy.offset)) === p) {
+                yy.count = yy.count + 1;
+            } else {
+                yy.offset = -this.lengthToWin - 1;
+            }
+
+            if (this.getPoint(x + (i + xy.offset), y + (i + xy.offset)) === p) {
+                xy.count = xy.count + 1;
+            } else {
+                xy.offset = -this.lengthToWin - 1;
+            }
+
+            console.log(`x: ${x - (i + yx.offset)}, y: ${y + (i + yx.offset)}`);
+            if (this.getPoint(x - (i + yx.offset), y + (i + yx.offset)) === p) {
+                yx.count = yx.count + 1;
+            } else {
+                yx.offset = -this.lengthToWin - 1;
+            }
+        }
+
+        console.log(xx.count, yy.count, xy.count, yx.count);
+
+        if (
+            xx.count === this.lengthToWin - 1 ||
+            yy.count === this.lengthToWin - 1 ||
+            xy.count === this.lengthToWin - 1 ||
+            yx.count === this.lengthToWin - 1
+        ) {
+            this.winner = p;
+        }
+    }
 
     reset() {
-        this.board = Array<Array<undefined | Point>>(this.width).fill(
-            Array<undefined | Point>(this.height).fill(undefined)
-        );
+        this.board = new Array<Array<undefined | Point>>(this.width);
+        for (let i = 0; i < this.width; i++) {
+            this.board[i] = new Array<undefined | Point>(this.width).fill(
+                undefined
+            );
+        }
+        this.winner = null;
     }
 
     isBoardFull() {

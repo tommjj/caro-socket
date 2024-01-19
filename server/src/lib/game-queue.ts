@@ -7,6 +7,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from '@/socket/types';
+import { randomUUID } from 'crypto';
 
 export default class GameQueue extends Queue<string> {
     private io;
@@ -26,8 +27,10 @@ export default class GameQueue extends Queue<string> {
         if (this.size() > 0) {
             const user = this.poll()!;
 
-            this.io.to(item).emit('matched');
-            this.io.to(user).emit('matched');
+            const roomId = randomUUID();
+
+            this.io.to(item).emit('matched', roomId);
+            this.io.to(user).emit('matched', roomId);
         } else {
             super.offer(item);
         }

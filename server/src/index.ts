@@ -16,6 +16,7 @@ import { auth, parseToken } from '@/auth';
 import Queue from '@/lib/queue';
 import { CORS } from '@/lib/utils/constant';
 import GameQueue from './lib/game-queue';
+import Caro from './lib/caro';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -219,8 +220,6 @@ const matchQueue3x3 = new GameQueue(io);
 const matchQueue5x5 = new GameQueue(io);
 const matchQueue7x7 = new GameQueue(io);
 
-let ping = 0;
-
 io.use((socket, next) => {
     const payload = parseToken(socket.handshake.auth.token);
 
@@ -273,6 +272,16 @@ io.on('connect', (socket) => {
 });
 
 setInterval(() => {
-    io.emit('ping', ping);
-    ping++;
+    io.emit('ping', Date.now());
 }, 1000);
+
+const caro = new Caro(3, 3, 3);
+console.log(caro.CurrentPlayer);
+caro.place(1, 0);
+caro.togglePlayer();
+caro.place(2, 0);
+caro.togglePlayer();
+caro.place(0, 0);
+caro.togglePlayer();
+caro.checkWinner(0, 0);
+console.log(caro.Winner, caro.CurrentPlayer);
