@@ -3,20 +3,57 @@
 import { create } from 'zustand';
 import { User } from '../zod.schema';
 
-type data = {
-    ping: number;
-    mode: 3 | 5 | 7;
-    findMatch: boolean;
-    user?: User;
+export enum Point {
+    X = 'X',
+    O = 'O',
+}
+
+export type GameMode = 3 | 5 | 7;
+
+export type Timeout = {
+    TimeRemaining: number;
+    lastTime: number;
+    isCount: boolean;
 };
 
-type action = {
+export type Player = {
+    id: string;
+    name: string;
+    score: number;
+    type: Point;
+    timeout: Timeout;
+};
+
+export type Players = {
+    player1: Player;
+    player2: Player;
+};
+
+export type Match = {
+    id: string;
+    player: Player;
+    opponents: Player;
+    mode: GameMode;
+    currentPlayer: Point;
+    board: (undefined | Point)[][];
+    isEnd: boolean;
+};
+
+export type Data = {
+    ping: number;
+    mode: GameMode;
+    findMatch: boolean;
+    user?: User;
+    match?: Match;
+};
+
+type Action = {
     setPing: (p: number) => void;
     setUser: (user: User) => void;
     setMode: (dir: number) => void;
 };
 
-const useGameStore = create<data & action>()((set) => ({
+const useGameStore = create<Data & Action>()((set) => ({
     ping: 0,
     mode: 3,
     findMatch: false,

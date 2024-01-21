@@ -70,7 +70,6 @@ export default class Caro {
     checkWinner(x: number, y: number) {
         const p = this.getPoint(x, y);
         if (!p) return;
-        console.log('p:', p);
         let xx = {
             count: 0,
             offset: 0,
@@ -87,8 +86,6 @@ export default class Caro {
             count: 0,
             offset: 0,
         };
-
-        console.log('board:', this.Board);
 
         for (let i = 1; i <= this.lengthToWin; i++) {
             if (this.getPoint(x + (i + xx.offset), y) === p) {
@@ -109,15 +106,12 @@ export default class Caro {
                 xy.offset = -this.lengthToWin - 1;
             }
 
-            console.log(`x: ${x - (i + yx.offset)}, y: ${y + (i + yx.offset)}`);
             if (this.getPoint(x - (i + yx.offset), y + (i + yx.offset)) === p) {
                 yx.count = yx.count + 1;
             } else {
                 yx.offset = -this.lengthToWin - 1;
             }
         }
-
-        console.log(xx.count, yy.count, xy.count, yx.count);
 
         if (
             xx.count === this.lengthToWin - 1 ||

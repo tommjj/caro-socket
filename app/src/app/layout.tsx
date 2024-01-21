@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { montserratAlternates } from '@/components/fonts';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
-import { AuthProvider } from '@/components/provider';
 
 export const metadata: Metadata = {
     title: 'Create Next App',
@@ -17,7 +16,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={montserratAlternates.className}>
-                <AuthProvider>{children}</AuthProvider>
+                {children}
                 <Toaster />
             </body>
         </html>

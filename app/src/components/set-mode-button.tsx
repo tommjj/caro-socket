@@ -1,8 +1,8 @@
 import useGameStore from '@/lib/store/store';
 import { cn } from '@/lib/utils';
 import {
-    ChevronLeftIcon,
-    ChevronRightIcon,
+    ArrowLeftIcon,
+    ArrowRightIcon,
     XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {} from '@heroicons/react/24/solid';
@@ -61,7 +61,7 @@ export const ModeDisplay = () => {
 
             <Board size={mode} />
             <div className="relative text-[12rem] leading-none select-none font-medium text-white pl-5 mb-2 ">
-                <p className="text-base leading-[0.8] font-medium px-1">m</p>
+                <p className="text-base leading-[0.8] font-medium px-1">m:</p>
                 <p className="leading-[0.8] drop-shadow-sm">
                     {`${mode}`}
                     <span className="text-6xl">
@@ -78,19 +78,25 @@ export const ModeDisplay = () => {
                 <button
                     onClick={handleClickLeft}
                     className={cn(
-                        'flex items-center justify-center pr-2 bg-light w-28 h-28 rounded-full hover:scale-105 transition-all'
+                        'flex items-center justify-center pl-1 bg-light w-28 h-28 rounded-full hover:scale-105 transition-all group'
                     )}
                 >
-                    <ChevronLeftIcon className="h-[70%]" strokeWidth={3} />
+                    <ArrowLeftIcon
+                        className="h-[70%] group-hover:-rotate-45 transition-all"
+                        strokeWidth={3}
+                    />
                 </button>
                 <div></div>
                 <button
                     onClick={handleClickRight}
                     className={cn(
-                        'flex items-center justify-center bg-light pl-2 w-28 h-28 rounded-full hover:scale-105 transition-all'
+                        'flex items-center justify-center bg-light pr-1 w-28 h-28 rounded-full hover:scale-105 transition-all group'
                     )}
                 >
-                    <ChevronRightIcon className="h-[70%]" strokeWidth={3} />
+                    <ArrowRightIcon
+                        className="h-[70%] group-hover:-rotate-45 transition-all"
+                        strokeWidth={3}
+                    />
                 </button>
             </div>
         </div>

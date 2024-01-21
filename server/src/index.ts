@@ -13,10 +13,11 @@ import {
 import router from '@/router';
 import { Server } from 'socket.io';
 import { auth, parseToken } from '@/auth';
-import Queue from '@/lib/queue';
 import { CORS } from '@/lib/utils/constant';
 import GameQueue from './lib/game-queue';
-import Caro from './lib/caro';
+import GameCache from './lib/cache';
+import Match from './lib/match';
+import appEmitter from './lib/event';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -215,10 +216,11 @@ const io = new Server<
 });
 
 //----====SOCKET====----\\
+const gameCache = new GameCache(io);
 
-const matchQueue3x3 = new GameQueue(io);
-const matchQueue5x5 = new GameQueue(io);
-const matchQueue7x7 = new GameQueue(io);
+const matchQueue3x3 = new GameQueue(gameCache, 3);
+const matchQueue5x5 = new GameQueue(gameCache, 5);
+const matchQueue7x7 = new GameQueue(gameCache, 7);
 
 io.use((socket, next) => {
     const payload = parseToken(socket.handshake.auth.token);
@@ -237,13 +239,22 @@ io.on('connect', (socket) => {
     socket.on('find match', (mode) => {
         switch (mode) {
             case 3:
-                matchQueue3x3.offer(socket.data.id);
+                matchQueue3x3.offer({
+                    id: socket.data.id,
+                    name: socket.data.name,
+                });
                 break;
             case 5:
-                matchQueue5x5.offer(socket.data.id);
+                matchQueue5x5.offer({
+                    id: socket.data.id,
+                    name: socket.data.name,
+                });
                 break;
             case 7:
-                matchQueue7x7.offer(socket.data.id);
+                matchQueue7x7.offer({
+                    id: socket.data.id,
+                    name: socket.data.name,
+                });
                 break;
             default:
                 break;
@@ -252,9 +263,9 @@ io.on('connect', (socket) => {
     });
 
     socket.on('cancel find match', () => {
-        matchQueue3x3.remove((e) => e === socket.data.id);
-        matchQueue5x5.remove((e) => e === socket.data.id);
-        matchQueue7x7.remove((e) => e === socket.data.id);
+        matchQueue3x3.remove((e) => e.id === socket.data.id);
+        matchQueue5x5.remove((e) => e.id === socket.data.id);
+        matchQueue7x7.remove((e) => e.id === socket.data.id);
 
         console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
     });
@@ -264,24 +275,86 @@ io.on('connect', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        matchQueue3x3.remove((e) => e === socket.data.id);
-        matchQueue5x5.remove((e) => e === socket.data.id);
-        matchQueue7x7.remove((e) => e === socket.data.id);
+        matchQueue3x3.remove((e) => e.id === socket.data.id);
+        matchQueue5x5.remove((e) => e.id === socket.data.id);
+        matchQueue7x7.remove((e) => e.id === socket.data.id);
         console.log('disconnect:', socket.id);
     });
+
+    socket.on('join room', (roomId) => {
+        const match = gameCache.Cache.get(roomId) as Match | undefined;
+        if (!match) return;
+
+        const isInRoom = match.isUserInMatch(socket.data.id);
+        if (!isInRoom) return;
+
+        socket.data.room && socket.leave(socket.data.room);
+        socket.data.room = roomId;
+        socket.join(roomId);
+
+        match.start();
+
+        io.to(socket.data.id).emit('sync match', {
+            id: roomId,
+            players: {
+                player1: {
+                    ...match.Players.player1,
+                    timeout: {
+                        ...match.Players.player1.timeout,
+                        timeoutId: undefined,
+                    },
+                },
+                player2: {
+                    ...match.Players.player2,
+                    timeout: {
+                        ...match.Players.player2.timeout,
+                        timeoutId: undefined,
+                    },
+                },
+            },
+            mode: match.Mode,
+            currentPlayer: match.CurrentPLayer,
+            board: match.Caro.Board,
+            isEnd: match.IsEnd,
+        });
+
+        socket.on('move', (x, y) => {
+            try {
+                match.move(x, y, socket.data.id);
+            } catch (error) {}
+
+            io.to(roomId).emit('sync match', {
+                id: roomId,
+                players: {
+                    player1: {
+                        ...match.Players.player1,
+                        timeout: {
+                            ...match.Players.player1.timeout,
+                            timeoutId: undefined,
+                        },
+                    },
+                    player2: {
+                        ...match.Players.player2,
+                        timeout: {
+                            ...match.Players.player2.timeout,
+                            timeoutId: undefined,
+                        },
+                    },
+                },
+                mode: match.Mode,
+                currentPlayer: match.CurrentPLayer,
+                board: match.Caro.Board,
+                isEnd: match.IsEnd,
+            });
+        });
+    });
+});
+
+appEmitter.on('end match', (id) => {
+    console.log('end match:', id);
+    gameCache.Cache.del(id);
 });
 
 setInterval(() => {
     io.emit('ping', Date.now());
 }, 1000);
-
-const caro = new Caro(3, 3, 3);
-console.log(caro.CurrentPlayer);
-caro.place(1, 0);
-caro.togglePlayer();
-caro.place(2, 0);
-caro.togglePlayer();
-caro.place(0, 0);
-caro.togglePlayer();
-caro.checkWinner(0, 0);
-console.log(caro.Winner, caro.CurrentPlayer);

@@ -19,8 +19,9 @@ const config = {
         },
         extend: {
             colors: {
-                light: '#d77f37',
-                dark: '#333333',
+                highlight: '#F55700',
+                light: '#F55010', //#F55700
+                dark: '#222222',
                 gray: '#434343',
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',
@@ -62,6 +63,22 @@ const config = {
                 sm: 'calc(var(--radius) - 4px)',
             },
             keyframes: {
+                grow: {
+                    from: { transform: 'scale(0.8)' },
+                    to: { transform: 'scale(1)' },
+                },
+                'up-down': {
+                    from: { transform: 'translateY(-100%)' },
+                    to: { transform: 'translateY(0)' },
+                },
+                'down-up': {
+                    from: { transform: 'translateY(100%)' },
+                    to: { transform: 'translateY(0)' },
+                },
+                'left-right': {
+                    from: { transform: 'translateX(-100%)' },
+                    to: { transform: 'translateX(0)' },
+                },
                 'accordion-down': {
                     from: { height: '0' },
                     to: { height: 'var(--radix-accordion-content-height)' },
@@ -72,6 +89,12 @@ const config = {
                 },
             },
             animation: {
+                'pulse-fast':
+                    'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                grow: 'grow 0.3s ease-out',
+                'up-down': 'up-down 0.3s ease-out',
+                'left-right': 'left-right 0.3s ease-out',
+                'down-up': 'down-up 0.3s ease-out',
                 'spin-slow': 'spin 30s linear infinite',
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',

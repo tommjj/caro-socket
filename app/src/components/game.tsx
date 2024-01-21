@@ -1,11 +1,13 @@
 'use client';
 
 import { http } from '@/lib/http';
-import useGameStore from '@/lib/store/store';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import useGameStore, { setGameStore } from '@/lib/store/store';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect } from 'react';
 import GameMenu from './game-menu';
 import socket, { connectSocket } from '@/lib/socket';
+import Match from './match';
+import MatchResult from './match-result';
 
 const Loading = () => {
     return (
@@ -22,9 +24,9 @@ const Loading = () => {
 };
 
 const Game = () => {
-    const searchParams = useSearchParams();
+    const match = useGameStore((s) => s.match);
+    const roomId = useSearchParams().get('room');
 
-    console.log(searchParams.toString());
     const user = useGameStore((s) => s.user);
     const setUser = useGameStore((s) => s.setUser);
     const { push } = useRouter();
@@ -52,7 +54,34 @@ const Game = () => {
         })();
     }, [setUser, push]);
 
-    return <>{user ? <GameMenu /> : <Loading />}</>;
+    useEffect(() => {
+        if (roomId) {
+            setGameStore((priv) => ({ findMatch: false }));
+
+            socket.emit('join room', roomId);
+        }
+    }, [roomId]);
+
+    return (
+        <>
+            {user ? (
+                roomId ? (
+                    match ? (
+                        <Match roomId={roomId} />
+                    ) : (
+                        <Loading />
+                    )
+                ) : (
+                    <>
+                        {/* <MatchResult /> */}
+                        <GameMenu />
+                    </>
+                )
+            ) : (
+                <Loading />
+            )}
+        </>
+    );
 };
 
 export default Game;

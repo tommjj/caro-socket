@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect } from 'react';
 
-import socket, { connectSocket } from '@/lib/socket';
+import socket from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import useGameStore, { setGameStore } from '@/lib/store/store';
 
 import { MoreOption, UserTopBar } from './user-bar';
-import { ModeDisplay } from './set-mod-button';
+import { ModeDisplay } from './set-mode-button';
 import { Counter } from './counter';
 import { useRouter } from 'next/navigation';
 

@@ -1,38 +1,28 @@
-import { Server } from 'socket.io';
-
 import Queue from './queue';
-import {
-    ClientToServerEvents,
-    InterServerEvents,
-    ServerToClientEvents,
-    SocketData,
-} from '@/socket/types';
-import { randomUUID } from 'crypto';
+import GameCache from './cache';
+import { GameMode } from './game-mode';
 
-export default class GameQueue extends Queue<string> {
-    private io;
-    constructor(
-        io: Server<
-            ClientToServerEvents,
-            ServerToClientEvents,
-            InterServerEvents,
-            SocketData
-        >
-    ) {
+export type User = {
+    id: string;
+    name: string;
+};
+
+export default class GameQueue extends Queue<User> {
+    private gameCache;
+    private mode;
+    constructor(gameCache: GameCache, mode: GameMode) {
         super();
-        this.io = io;
+        this.mode = mode;
+        this.gameCache = gameCache;
     }
 
-    offer(item: string): void {
+    offer(player: User): void {
         if (this.size() > 0) {
-            const user = this.poll()!;
+            const player1 = this.poll()!;
 
-            const roomId = randomUUID();
-
-            this.io.to(item).emit('matched', roomId);
-            this.io.to(user).emit('matched', roomId);
+            this.gameCache.createGame(player, player1, this.mode);
         } else {
-            super.offer(item);
+            super.offer(player);
         }
     }
 }

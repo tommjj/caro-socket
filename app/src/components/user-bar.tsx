@@ -1,7 +1,6 @@
 'use client';
 
 import useGameStore from '@/lib/store/store';
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 import {
@@ -55,7 +54,7 @@ export const MoreOption = () => {
                                     await http.get('/api/auth/sign-out');
                                     push('/sign-in');
                                 }}
-                                className="flex items-center px-2 text-white text-lg w-40 h-14 cursor-pointer hover:bg-gray"
+                                className="flex items-center px-2 text-white text-lg w-40 h-14 cursor-pointer bg-dark hover:bg-gray"
                             >
                                 <ArrowLeftStartOnRectangleIcon className="w-5 mx-3"></ArrowLeftStartOnRectangleIcon>
                                 Sign out
