@@ -54,11 +54,15 @@ const PofBoard = ({
     y,
     type,
     isWinLine,
+    hover,
+    hoverType,
 }: {
     x: number;
     y: number;
     type: undefined | Point;
     isWinLine: boolean;
+    hover: boolean;
+    hoverType: Point;
 }) => {
     const handleClick = useCallback(() => {
         socket.emit('move', x, y);
@@ -90,7 +94,25 @@ const PofBoard = ({
                         ></XMarkIcon>
                     )}
                 </div>
-            ) : undefined}
+            ) : hover ? (
+                <div className="flex justify-center items-center relative w-full h-full text-dark hover:text-gray">
+                    {hoverType === Point.O ? (
+                        <FaRegCircle
+                            className={cn(
+                                'relative w-[80%] h-[80%] transition-all'
+                            )}
+                            strokeWidth={0.5}
+                        ></FaRegCircle>
+                    ) : (
+                        <XMarkIcon
+                            className={cn(
+                                'relative w-[110%] h-[110%] transition-all scale-110'
+                            )}
+                            strokeWidth={3}
+                        ></XMarkIcon>
+                    )}
+                </div>
+            ) : null}
         </div>
     );
 };
@@ -98,6 +120,8 @@ const PofBoard = ({
 const Board = () => {
     const board = useGameStore((s) => s.match?.board)!;
     const mode = useGameStore((s) => s.match?.mode)!;
+    const player = useGameStore((s) => s.match?.player)!;
+    const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
 
     return (
         <div
@@ -115,6 +139,8 @@ const Board = () => {
                         y={iy}
                         type={t}
                         isWinLine={checkWinner(ix, iy, mode, board)}
+                        hoverType={player.type}
+                        hover={currentTurn === player.type}
                     ></PofBoard>
                 ))
             )}
