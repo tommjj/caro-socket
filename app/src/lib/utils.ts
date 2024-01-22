@@ -1,39 +1,43 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { GameMode, Point } from './store/store';
+import { GameMode, PointState } from './store/store';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+// tạo một bàn cờ rổng !không được sử dụng
 export function createBoard(width: number, height: number) {
-    const board = new Array<Array<undefined | Point>>(width);
+    const board = new Array<Array<undefined | PointState>>(width);
     for (let i = 0; i < width; i++) {
-        board[i] = new Array<undefined | Point>(height).fill(undefined);
+        board[i] = new Array<undefined | PointState>(height).fill(undefined);
     }
     return board;
 }
 
+//lấy một điểm trên bàn cờ với x, y
 const getPoint = (
     x: number,
     y: number,
     mode: GameMode,
-    board: (undefined | Point)[][]
+    board: (undefined | PointState)[][]
 ) => {
     if (!isInBoard(x, y, mode)) return undefined;
 
     return board[x][y];
 };
 
+// kiểm tra điểm có nằm trong bàn cờ không
 const isInBoard = (x: number, y: number, mode: GameMode) => {
     return x >= 0 && x < mode && y >= 0 && y < mode;
 };
 
+// kiểm tra điểm x, y có nằm trên đường tạo chiến thắng không
 export const checkWinner = (
     x: number,
     y: number,
     mode: GameMode,
-    board: (undefined | Point)[][]
+    board: (undefined | PointState)[][]
 ) => {
     const p = getPoint(x, y, mode, board);
 

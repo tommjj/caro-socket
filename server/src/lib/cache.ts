@@ -23,7 +23,7 @@ class GameCache {
         >,
         cache?: NodeCache
     ) {
-        this.cache = cache || new NodeCache({ useClones: false });
+        this.cache = cache || new NodeCache({ useClones: false, stdTTL: 3600 });
 
         this.io = io;
     }

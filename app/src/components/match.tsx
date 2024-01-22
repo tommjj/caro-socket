@@ -1,6 +1,6 @@
 import { FaRegCircle } from 'react-icons/fa';
 
-import useGameStore, { Point, Timeout } from '@/lib/store/store';
+import useGameStore, { PointState, Timeout } from '@/lib/store/store';
 import { checkWinner, cn } from '@/lib/utils';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useCallback, useEffect, useState } from 'react';
@@ -65,10 +65,10 @@ const PofBoard = ({
 }: {
     x: number;
     y: number;
-    type: undefined | Point;
+    type: undefined | PointState;
     isWinLine: boolean;
     inTurn: boolean;
-    playerType: Point;
+    playerType: PointState;
 }) => {
     const handleClick = useCallback(() => {
         if (type) return;
@@ -83,7 +83,7 @@ const PofBoard = ({
             <div className="flex justify-center items-center absolute top-1 left-1">{`${x},${y}`}</div>
             {type ? (
                 <div className="flex justify-center items-center relative w-full h-full text-light">
-                    {type === Point.O ? (
+                    {type === PointState.O ? (
                         <FaRegCircle
                             className={cn(
                                 'relative w-[80%] h-[80%] transition-all',
@@ -103,7 +103,7 @@ const PofBoard = ({
                 </div>
             ) : hover ? (
                 <div className="flex justify-center items-center relative w-full h-full text-dark hover:text-gray">
-                    {hoverType === Point.O ? (
+                    {hoverType === PointState.O ? (
                         <FaRegCircle
                             className={cn(
                                 'relative w-[80%] h-[80%] transition-all'
@@ -260,11 +260,11 @@ const RightSide = () => {
 };
 
 const Match = ({ roomId }: { roomId: string }) => {
-    const isEnd = useGameStore((s) => s.match?.isEnd)!;
+    const matchResult = useGameStore((s) => s.match?.matchResult)!;
 
     return (
         <>
-            {isEnd ? <MatchResult /> : null}
+            {matchResult === undefined ? null : <MatchResult />}
             <div className="flex w-full h-full bg-dark text-white">
                 <LeftSide />
 

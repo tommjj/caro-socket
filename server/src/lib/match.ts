@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import Caro, { Point } from './caro';
+import Caro, { PointState } from './caro';
 import {
     ClientToServerEvents,
     InterServerEvents,
@@ -20,7 +20,7 @@ export type Player = {
     id: string;
     name: string;
     score: number;
-    type: Point;
+    type: PointState;
     timeout: Timeout;
 };
 
@@ -48,7 +48,7 @@ export default class Match {
     private numberOfMatch: number;
     private io;
     private mode;
-    private isEnd: boolean = false;
+    private matchResult: string | null | undefined;
 
     constructor(
         io: Server<
@@ -73,7 +73,7 @@ export default class Match {
             player1: {
                 ...player1,
                 score: 0,
-                type: randBool ? Point.X : Point.O,
+                type: randBool ? PointState.X : PointState.O,
                 timeout: {
                     timeoutId: undefined,
                     isCount: false,
@@ -84,7 +84,7 @@ export default class Match {
             player2: {
                 ...player2,
                 score: 0,
-                type: !randBool ? Point.X : Point.O,
+                type: !randBool ? PointState.X : PointState.O,
                 timeout: {
                     timeoutId: undefined,
                     isCount: false,
@@ -129,8 +129,8 @@ export default class Match {
         return this.caro.CurrentPlayer;
     }
 
-    get IsEnd() {
-        return this.isEnd;
+    get MatchResult() {
+        return this.matchResult;
     }
 
     start() {
@@ -151,6 +151,7 @@ export default class Match {
         playerSetTimeout.lastTime = Date.now();
 
         playerSetTimeout.timeoutId = setTimeout(() => {
+            if (this.MatchResult !== undefined) return;
             this.caro.timeOut();
 
             const winner = this.caro.Winner;
@@ -185,7 +186,7 @@ export default class Match {
     toggleTimeout() {}
 
     private handleSetTimeout() {
-        if (this.isEnd) {
+        if (this.matchResult !== undefined) {
             this.clearTimeoutById(this.players.player1.id);
             this.clearTimeoutById(this.players.player2.id);
             return;
@@ -216,7 +217,7 @@ export default class Match {
         if (player.type !== this.caro.CurrentPlayer) return false;
 
         if (this.caro.Winner) return false;
-        if (this.isEnd) return false;
+        if (this.matchResult) return false;
         return true;
     }
 
@@ -236,7 +237,7 @@ export default class Match {
                 'place',
                 x,
                 y,
-                nextPlayer.type === Point.O ? Point.X : Point.O,
+                nextPlayer.type === PointState.O ? PointState.X : PointState.O,
                 nextPlayer.id
             );
 
@@ -287,18 +288,18 @@ export default class Match {
             mode: this.Mode,
             currentPlayer: this.CurrentPLayer,
             board: this.Caro.Board,
-            isEnd: this.isEnd,
+            matchResult: this.MatchResult,
         });
     }
 
-    private handleWinDelay(playerId: string, winner: Point) {
+    private handleWinDelay(playerId: string, winner: PointState) {
         setTimeout(() => {
             this.upScore(winner);
 
             const userWon = this.getWinner();
 
             if (userWon) {
-                this.isEnd = true;
+                this.matchResult = userWon;
                 this.io.to(this.id).emit('win match', userWon);
 
                 appEmitter.emit('end match', this.id);
@@ -318,12 +319,13 @@ export default class Match {
             const isDraw = this.isDraw();
 
             if (isDraw) {
-                this.isEnd = true;
+                this.matchResult = null;
                 this.io.to(this.id).emit('draw match');
 
                 appEmitter.emit('end match', this.id);
             } else if (userWon) {
-                this.isEnd = true;
+                this.matchResult = userWon;
+
                 this.io.to(this.id).emit('win match', userWon);
 
                 appEmitter.emit('end match', this.id);
@@ -340,7 +342,7 @@ export default class Match {
         this.players.player2.score += 1;
     }
 
-    upScore(p: Point) {
+    upScore(p: PointState) {
         const player =
             this.players.player1.type === p
                 ? this.players.player1

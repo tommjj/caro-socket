@@ -39,164 +39,6 @@ app.use('*', logger());
 
 app.route('/', router);
 
-app.get('/', (c) => {
-    const user = auth(c);
-    return c.html(html`<!DOCTYPE html>
-        <html>
-            <head>
-                <meta
-                    name="viewport"
-                    content="width=device-width,initial-scale=1.0"
-                />
-                <title>${user ? user.name : 'chat socket'}</title>
-                <style>
-                    .header {
-                        margin: 0;
-                        padding-left: 2rem;
-                    }
-
-                    body {
-                        margin: 0;
-                        padding-bottom: 3rem;
-                        font-family: -apple-system, BlinkMacSystemFont,
-                            'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-                    }
-
-                    .form__container {
-                        background: rgba(0, 0, 0, 0.15);
-                        padding: 0.25rem;
-                        position: fixed;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        display: flex;
-                        height: 3rem;
-                        box-sizing: border-box;
-                        backdrop-filter: blur(10px);
-                    }
-                    #input {
-                        border: none;
-                        padding: 0 1rem;
-                        flex-grow: 1;
-                        border-radius: 2rem;
-                        margin: 0.25rem;
-                    }
-                    #input:focus {
-                        outline: none;
-                    }
-                    .button {
-                        background: #333;
-                        border: none;
-                        padding: 0 1rem;
-                        margin: 0.25rem;
-                        border-radius: 3px;
-                        outline: none;
-                        color: #fff;
-                    }
-
-                    .form {
-                        display: flex;
-                        flex-grow: 1;
-                        height: 100%;
-                    }
-
-                    #messages {
-                        list-style-type: none;
-                        margin: 0;
-                        padding: 0;
-                    }
-                    #messages > li {
-                        padding: 0.5rem 1rem;
-                    }
-                    #messages > li:nth-child(odd) {
-                        background: #efefef;
-                    }
-                </style>
-            </head>
-            <body>
-                <h1 class="header">${user ? user.name : ''}</h1>
-                <ul id="messages"></ul>
-                <div class="form__container">
-                    <form class="form" id="form" action="">
-                        <input id="input" autocomplete="off" />
-                        <button class="button">Send</button>
-                    </form>
-                    <button class="button" id="conn">toggle conn</button>
-                    <button class="button" id="post">post</button>
-                </div>
-
-                <script src="/socket.io/socket.io.js"></script>
-                <script>
-                    const socket = io({
-                        auth: {
-                            token: 'eyJpZCI6IjQzOGVhM2FjLWE5NTYtNDk0NC1hODQ0LTU5NjI4YzIxZDlmNiIsIm5hbWUiOiJGaWFtbWV0dGEiLCJhdmF0YXIiOiJkZWZhdWx0X2F2YXRhci5wbmciLCJleHBpcmVzIjoxNzA1Mjg5NDI0NTYwfQ==.LjoSRKIS7PO5BLYumEqQAWib/vGI6e7GPMJ0RTPJ8zQ',
-                        },
-                    });
-
-                    const form = document.getElementById('form');
-                    const input = document.getElementById('input');
-                    const messages = document.getElementById('messages');
-                    const toggleConnButton = document.getElementById('conn');
-                    const postButton = document.getElementById('post');
-
-                    postButton.addEventListener('click', async () => {
-                        fetch('/api/auth/sign-in', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                username: 'Fiammetta',
-                                password: 1234,
-                            }),
-                        })
-                            .then((e) => e.json())
-                            .then((e) => {
-                                console.log(e);
-                            });
-                    });
-
-                    toggleConnButton.addEventListener('click', (e) => {
-                        if (!socket.connected) {
-                            socket.connect();
-                        } else {
-                            socket.disconnect();
-                        }
-                    });
-
-                    form.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        if (input.value) {
-                            socket.emit('chat message', input.value);
-                            input.value = '';
-                        }
-                    });
-
-                    socket.on('disconnect', () => {
-                        const item = document.createElement('li');
-                        item.textContent = 'disconnected';
-                        messages.appendChild(item);
-                        window.scrollTo(0, document.body.scrollHeight);
-                    });
-
-                    socket.on('connect', () => {
-                        const item = document.createElement('li');
-                        item.textContent = 'connected';
-                        messages.appendChild(item);
-                        window.scrollTo(0, document.body.scrollHeight);
-                    });
-
-                    socket.on('chat message', (msg) => {
-                        const item = document.createElement('li');
-                        item.textContent = msg;
-                        messages.appendChild(item);
-                        window.scrollTo(0, document.body.scrollHeight);
-                    });
-                </script>
-            </body>
-        </html>`);
-});
-
 //----====CREATE SERVER====-----\\
 const server = serve({ ...app, port }, () => {
     console.log('   - Server running on port', port);
@@ -216,14 +58,17 @@ const io = new Server<
 });
 
 //----====SOCKET====----\\
+// tạo game cache nơi lưu các màng chơi
 const gameCache = new GameCache(io);
 
+//khởi tạo hàng các đợi
 const matchQueue3x3 = new GameQueue(gameCache, 3);
 const matchQueue5x5 = new GameQueue(gameCache, 5);
 const matchQueue7x7 = new GameQueue(gameCache, 7);
 
+// xác thực người dùng
 io.use((socket, next) => {
-    const payload = parseToken(socket.handshake.auth.token);
+    const payload = parseToken(socket.handshake.auth.token); // kiểm tra token
 
     if (!payload) return socket._error('invalid credentials');
 
@@ -232,6 +77,7 @@ io.use((socket, next) => {
     next();
 });
 
+// sư lý kết nối
 io.on('connect', (socket) => {
     console.log('connect', socket.id);
     socket.join(socket.data.id);
@@ -268,10 +114,6 @@ io.on('connect', (socket) => {
         matchQueue7x7.remove((e) => e.id === socket.data.id);
 
         console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
-    });
-
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', `${socket.data.name}: ${msg}`);
     });
 
     socket.on('disconnect', () => {
@@ -315,7 +157,7 @@ io.on('connect', (socket) => {
             mode: match.Mode,
             currentPlayer: match.CurrentPLayer,
             board: match.Caro.Board,
-            isEnd: match.IsEnd,
+            matchResult: match.MatchResult,
         });
 
         socket.on('move', (x, y) => {
@@ -344,7 +186,7 @@ io.on('connect', (socket) => {
                 mode: match.Mode,
                 currentPlayer: match.CurrentPLayer,
                 board: match.Caro.Board,
-                isEnd: match.IsEnd,
+                matchResult: match.MatchResult,
             });
         });
     });

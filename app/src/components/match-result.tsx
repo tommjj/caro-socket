@@ -1,6 +1,6 @@
 'use client';
 
-import useGameStore from '@/lib/store/store';
+import useGameStore, { Player } from '@/lib/store/store';
 import { cn } from '@/lib/utils';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
@@ -8,18 +8,27 @@ import { useRouter } from 'next/navigation';
 const MatchResult = () => {
     const { push } = useRouter();
     const match = useGameStore((s) => s.match)!;
-    const lost =
-        match.player.score < match.opponents.score
-            ? match.player
-            : match.opponents;
-    const won =
-        match.player.score < match.opponents.score
-            ? match.opponents
-            : match.player;
+
+    let won: Player;
+    let lost: Player;
+
+    if (match.matchResult === null) {
+        won = match.opponents;
+        lost = match.player;
+    } else {
+        won =
+            match.player.id === match.matchResult
+                ? match.player
+                : match.opponents;
+        lost =
+            match.opponents.id === match.matchResult
+                ? match.player
+                : match.opponents;
+    }
 
     return (
         <div className="flex fixed w-screen bg-dark h-screen z-50 select-none">
-            {lost.score === won.score ? (
+            {match.matchResult === null ? (
                 <>
                     <div
                         className={cn(
@@ -43,7 +52,7 @@ const MatchResult = () => {
                             </div>
                             <div className="px-1 pt-3">NAME 02:</div>
                             <div className="text-[4rem] leading-none">
-                                {won.name}
+                                {lost.name}
                             </div>
                         </div>
 

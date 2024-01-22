@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import GameMenu from './game-menu';
 import socket, { connectSocket } from '@/lib/socket';
 import Match from './match';
-import MatchResult from './match-result';
 
 const Loading = () => {
     return (
@@ -72,10 +71,7 @@ const Game = () => {
                         <Loading />
                     )
                 ) : (
-                    <>
-                        {/* <MatchResult /> */}
-                        <GameMenu />
-                    </>
+                    <GameMenu />
                 )
             ) : (
                 <Loading />

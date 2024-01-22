@@ -1,7 +1,7 @@
 'use client';
 
 import { Socket, io } from 'socket.io-client';
-import { GameMode, Players, Point, setGameStore } from './store/store';
+import { GameMode, Players, PointState, setGameStore } from './store/store';
 import { API_HOST } from './http';
 
 export interface ServerToClientEvents {
@@ -12,11 +12,11 @@ export interface ServerToClientEvents {
         id: string;
         players: Players;
         mode: GameMode;
-        currentPlayer: Point;
-        board: (Point | undefined)[][];
-        isEnd: boolean;
+        currentPlayer: PointState;
+        board: (PointState | undefined)[][];
+        matchResult: string | null | undefined;
     }) => void;
-    place: (x: number, y: number, type: Point, next: string) => void;
+    place: (x: number, y: number, type: PointState, next: string) => void;
     'win round': (id: string) => void;
     'win match': (id: string) => void;
     'draw round': (id: string) => void;
@@ -45,9 +45,9 @@ socket.on('ping', (p) => {
     });
 });
 
+// sư lý sự kiện khi đồng bộ màng chơi
 socket.on('sync match', (data) => {
-    console.log(data);
-
+    //lưu dư liệu được gửi vào store
     setGameStore((priv) => {
         const playerId = priv.user?.id!;
 
@@ -65,12 +65,13 @@ socket.on('sync match', (data) => {
                     playerId !== data.players.player1.id
                         ? data.players.player1
                         : data.players.player2,
-                isEnd: data.isEnd,
+                matchResult: data.matchResult,
             },
         };
     });
 });
 
+// func tạo kết nối với máy chủ với auth là token xác thực
 export const connectSocket = (auth: { token: string }) => {
     socket.auth = auth;
     socket.connect();

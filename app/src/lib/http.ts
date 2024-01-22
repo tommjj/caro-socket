@@ -3,6 +3,8 @@ import { User } from './zod.schema';
 export const API_HOST =
     process.env.NEXT_PUBLIC_ORIGIN_API || 'http://localhost:8080';
 
+// tạo các phưng thức fetch data
+
 const createMethods = (
     dfPath: string | URL | Request = '',
     init: RequestInit = {}

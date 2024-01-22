@@ -3,7 +3,9 @@
 import { create } from 'zustand';
 import { User } from '../zod.schema';
 
-export enum Point {
+// store nơi lưu các biến toàn cục của ứng dụng
+
+export enum PointState {
     X = 'X',
     O = 'O',
 }
@@ -20,7 +22,7 @@ export type Player = {
     id: string;
     name: string;
     score: number;
-    type: Point;
+    type: PointState;
     timeout: Timeout;
 };
 
@@ -34,9 +36,9 @@ export type Match = {
     player: Player;
     opponents: Player;
     mode: GameMode;
-    currentPlayer: Point;
-    board: (undefined | Point)[][];
-    isEnd: boolean;
+    currentPlayer: PointState;
+    board: (undefined | PointState)[][];
+    matchResult: string | null | undefined;
 };
 
 export type Data = {

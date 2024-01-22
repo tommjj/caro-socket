@@ -1,6 +1,8 @@
-import { Point } from '@/lib/caro';
+import { PointState } from '@/lib/caro';
 import { GameMode } from '@/lib/game-mode';
-import { Player, Players } from '@/lib/match';
+import { Players } from '@/lib/match';
+
+// khai báo các sự kiện socket
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
@@ -10,11 +12,11 @@ export interface ServerToClientEvents {
         id: string;
         players: Players;
         mode: GameMode;
-        currentPlayer: Point;
-        board: (Point | undefined)[][];
-        isEnd: boolean;
+        currentPlayer: PointState;
+        board: (PointState | undefined)[][];
+        matchResult: string | null | undefined;
     }) => void;
-    place: (x: number, y: number, type: Point, next: string) => void;
+    place: (x: number, y: number, type: PointState, next: string) => void;
     'win round': (id: string) => void;
     'win match': (id: string) => void;
     'draw round': () => void;

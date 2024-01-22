@@ -2,7 +2,7 @@ export type GameOptions = {
     lengthToWin: number;
 };
 
-export enum Point {
+export enum PointState {
     X = 'X',
     O = 'O',
 }
@@ -12,16 +12,16 @@ export default class Caro {
     private height;
     private lengthToWin;
     private board;
-    private currentPlayer = Point.X;
-    private winner: null | Point = null;
+    private currentPlayer = PointState.X;
+    private winner: null | PointState = null;
     constructor(width: number, height: number, lengthToWin: number = 4) {
         this.width = width;
         this.height = height;
         this.lengthToWin = lengthToWin;
 
-        this.board = new Array<Array<undefined | Point>>(width);
+        this.board = new Array<Array<undefined | PointState>>(width);
         for (let i = 0; i < width; i++) {
-            this.board[i] = new Array<undefined | Point>(height).fill(
+            this.board[i] = new Array<undefined | PointState>(height).fill(
                 undefined
             );
         }
@@ -64,7 +64,8 @@ export default class Caro {
     }
 
     timeOut() {
-        this.winner = this.currentPlayer === Point.X ? Point.O : Point.X;
+        this.winner =
+            this.currentPlayer === PointState.X ? PointState.O : PointState.X;
     }
 
     checkWinner(x: number, y: number) {
@@ -124,9 +125,9 @@ export default class Caro {
     }
 
     reset() {
-        this.board = new Array<Array<undefined | Point>>(this.width);
+        this.board = new Array<Array<undefined | PointState>>(this.width);
         for (let i = 0; i < this.width; i++) {
-            this.board[i] = new Array<undefined | Point>(this.width).fill(
+            this.board[i] = new Array<undefined | PointState>(this.width).fill(
                 undefined
             );
         }
@@ -138,6 +139,7 @@ export default class Caro {
     }
 
     togglePlayer() {
-        this.currentPlayer = this.CurrentPlayer === Point.O ? Point.X : Point.O;
+        this.currentPlayer =
+            this.CurrentPlayer === PointState.O ? PointState.X : PointState.O;
     }
 }
