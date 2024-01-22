@@ -125,8 +125,20 @@ export const parseToken = (token: string) => {
     const t = unsignCookie(token);
     if (!t) return undefined;
 
-    const payload = JSON.parse(unBase64(token));
-    if (payload.expires < Date.now()) return false;
+    try {
+        const payload = JSON.parse(unBase64(token));
+        if (payload.expires < Date.now()) return false;
+        return payload;
+    } catch (e) {
+        const payload = JSON.parse(
+            RegExp(/(\{.*?\})/).exec(unBase64(token))?.[0]!
+        );
 
-    return payload;
+        try {
+            if (payload.expires < Date.now()) return false;
+            return payload;
+        } catch (error) {
+            return undefined;
+        }
+    }
 };

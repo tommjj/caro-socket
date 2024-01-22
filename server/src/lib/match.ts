@@ -32,11 +32,11 @@ export type Players = {
 const getTimeout = (mode: GameMode) => {
     switch (mode) {
         case 3:
-            return 1000 * 60;
+            return 1000 * 40;
         case 5:
-            return 1000 * 60 * 3;
+            return 1000 * 60 * 2;
         case 7:
-            return 1000 * 60 * 5;
+            return 1000 * 60 * 3;
     }
 };
 
@@ -104,7 +104,7 @@ export default class Match {
                 this.numberOfMatch = 5;
                 break;
             case 7:
-                this.caro = new Caro(7, 7, 4);
+                this.caro = new Caro(7, 7, 5);
                 this.numberOfMatch = 3;
                 break;
         }

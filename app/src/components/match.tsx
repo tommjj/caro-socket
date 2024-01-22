@@ -28,13 +28,19 @@ const Timer = ({ timeout }: { timeout: Timeout }) => {
         if (!timeout.isCount) return;
 
         const id = setInterval(() => {
-            setCount((p) => (p > 0 ? p - 1 : p));
-        }, 1000);
+            setCount(
+                Math.round(
+                    (timeout.TimeRemaining - (Date.now() - timeout.lastTime)) /
+                        1000 +
+                        0.5
+                )
+            );
+        }, 500);
 
         return () => {
             clearInterval(id);
         };
-    }, [timeout.isCount]);
+    }, [timeout]);
 
     return (
         <span
@@ -54,19 +60,20 @@ const PofBoard = ({
     y,
     type,
     isWinLine,
-    hover,
-    hoverType,
+    inTurn: hover,
+    playerType: hoverType,
 }: {
     x: number;
     y: number;
     type: undefined | Point;
     isWinLine: boolean;
-    hover: boolean;
-    hoverType: Point;
+    inTurn: boolean;
+    playerType: Point;
 }) => {
     const handleClick = useCallback(() => {
+        if (type) return;
         socket.emit('move', x, y);
-    }, [x, y]);
+    }, [type, x, y]);
 
     return (
         <div
@@ -139,8 +146,8 @@ const Board = () => {
                         y={iy}
                         type={t}
                         isWinLine={checkWinner(ix, iy, mode, board)}
-                        hoverType={player.type}
-                        hover={currentTurn === player.type}
+                        playerType={player.type}
+                        inTurn={currentTurn === player.type}
                     ></PofBoard>
                 ))
             )}

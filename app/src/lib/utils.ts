@@ -39,7 +39,7 @@ export const checkWinner = (
 
     if (!p) return false;
 
-    const lengthToWin = mode === 3 ? 3 : 4;
+    const lengthToWin = mode === 3 ? 3 : mode === 5 ? 4 : 5;
 
     let xx = {
         count: 0,
