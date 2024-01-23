@@ -7,6 +7,7 @@ export enum PointState {
     O = 'O',
 }
 
+// class caro sư lý các sự kiện của một round đấu
 export default class Caro {
     private width;
     private height;

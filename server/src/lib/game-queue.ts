@@ -7,6 +7,7 @@ export type User = {
     name: string;
 };
 
+// hàng đợi tiềm trận
 export default class GameQueue extends Queue<User> {
     private gameCache;
     private mode;

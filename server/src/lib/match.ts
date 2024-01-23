@@ -40,6 +40,7 @@ const getTimeout = (mode: GameMode) => {
     }
 };
 
+// class sư lý một trận đấu
 export default class Match {
     private isStart: boolean = false;
     private id: string;
@@ -162,7 +163,7 @@ export default class Match {
                         ? this.players.player1.id
                         : this.players.player2.id;
 
-                this.handleWinDelay(playerId, winner);
+                this.handleWin(playerId, winner);
             }
         }, playerSetTimeout.TimeRemaining);
     }
@@ -208,7 +209,7 @@ export default class Match {
         this.setTimeoutById(playerSetTimeoutId);
     }
 
-    checkCanMove(x: number, y: number, playerId: string) {
+    canMovingHere(x: number, y: number, playerId: string) {
         const player =
             this.players.player1.id === playerId
                 ? this.players.player1
@@ -222,39 +223,24 @@ export default class Match {
     }
 
     move(x: number, y: number, playerId: string) {
-        if (!this.checkCanMove(x, y, playerId)) return;
+        if (!this.canMovingHere(x, y, playerId)) return;
 
         this.caro.place(x, y);
-
-        const nextPlayer =
-            this.players.player1.id !== playerId
-                ? this.players.player1
-                : this.players.player2;
-
-        this.io
-            .to(this.id)
-            .emit(
-                'place',
-                x,
-                y,
-                nextPlayer.type === PointState.O ? PointState.X : PointState.O,
-                nextPlayer.id
-            );
+        this.handleSetTimeout();
+        this.sync();
 
         this.caro.checkWinner(x, y);
 
         const winner = this.caro.Winner;
 
         if (winner) {
-            this.handleWinDelay(playerId, winner);
-            this.handleSetTimeout();
+            this.handleWin(playerId, winner);
         } else {
             const isBoardFull = this.caro.isBoardFull();
 
             if (isBoardFull) {
-                this.handleDrawDelay();
+                this.handleDraw();
             }
-            this.handleSetTimeout();
         }
     }
 
@@ -265,9 +251,15 @@ export default class Match {
         this.clearTimeoutById(this.players.player2.id);
         this.players.player1.timeout.TimeRemaining = getTimeout(this.mode);
         this.players.player2.timeout.TimeRemaining = getTimeout(this.mode);
-        this.handleSetTimeout();
 
-        this.io.to(this.Id).emit('sync match', {
+        setTimeout(() => {
+            this.handleSetTimeout();
+            this.sync();
+        }, 700);
+    }
+
+    getSyncData() {
+        return {
             id: this.Id,
             players: {
                 player1: {
@@ -289,52 +281,52 @@ export default class Match {
             currentPlayer: this.CurrentPLayer,
             board: this.Caro.Board,
             matchResult: this.MatchResult,
-        });
+        };
     }
 
-    private handleWinDelay(playerId: string, winner: PointState) {
-        setTimeout(() => {
-            this.upScore(winner);
-
-            const userWon = this.getWinner();
-
-            if (userWon) {
-                this.matchResult = userWon;
-                this.io.to(this.id).emit('win match', userWon);
-
-                appEmitter.emit('end match', this.id);
-            } else {
-                this.io.to(this.id).emit('win round', playerId);
-            }
-
-            this.newRound();
-        }, 700);
+    sync() {
+        this.io.to(this.Id).emit('sync match', this.getSyncData());
     }
 
-    private handleDrawDelay() {
-        setTimeout(() => {
-            this.draw();
+    private handleWin(playerId: string, winner: PointState) {
+        this.upScore(winner);
 
-            const userWon = this.getWinner();
-            const isDraw = this.isDraw();
+        const userWon = this.getWinner();
 
-            if (isDraw) {
-                this.matchResult = null;
-                this.io.to(this.id).emit('draw match');
+        if (userWon) {
+            this.matchResult = userWon;
+            this.io.to(this.id).emit('win match', userWon);
 
-                appEmitter.emit('end match', this.id);
-            } else if (userWon) {
-                this.matchResult = userWon;
+            appEmitter.emit('end match', this.id);
+        } else {
+            this.io.to(this.id).emit('win round', playerId);
+        }
 
-                this.io.to(this.id).emit('win match', userWon);
+        this.newRound();
+    }
 
-                appEmitter.emit('end match', this.id);
-            } else {
-                this.io.to(this.id).emit('draw round');
-            }
+    private handleDraw() {
+        this.draw();
 
-            this.newRound();
-        }, 700);
+        const userWon = this.getWinner();
+        const isDraw = this.isDraw();
+
+        if (isDraw) {
+            this.matchResult = null;
+            this.io.to(this.id).emit('draw match');
+
+            appEmitter.emit('end match', this.id);
+        } else if (userWon) {
+            this.matchResult = userWon;
+
+            this.io.to(this.id).emit('win match', userWon);
+
+            appEmitter.emit('end match', this.id);
+        } else {
+            this.io.to(this.id).emit('draw round');
+        }
+
+        this.newRound();
     }
 
     draw() {

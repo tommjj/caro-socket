@@ -124,6 +124,7 @@ io.on('connect', (socket) => {
     });
 
     socket.on('join room', (roomId) => {
+        //kiểm tra màng chơi có trong cache và người chơi đó có là một người chơi trong phòng không
         const match = gameCache.Cache.get(roomId) as Match | undefined;
         if (!match) return;
 
@@ -134,60 +135,14 @@ io.on('connect', (socket) => {
         socket.data.room = roomId;
         socket.join(roomId);
 
-        match.start();
+        match.start(); // khơi động màng chơi khi có người chơi kết nối
 
-        io.to(socket.data.id).emit('sync match', {
-            id: roomId,
-            players: {
-                player1: {
-                    ...match.Players.player1,
-                    timeout: {
-                        ...match.Players.player1.timeout,
-                        timeoutId: undefined,
-                    },
-                },
-                player2: {
-                    ...match.Players.player2,
-                    timeout: {
-                        ...match.Players.player2.timeout,
-                        timeoutId: undefined,
-                    },
-                },
-            },
-            mode: match.Mode,
-            currentPlayer: match.CurrentPLayer,
-            board: match.Caro.Board,
-            matchResult: match.MatchResult,
-        });
+        //gưi đồng bộ đến máy khách
+        match.sync();
 
+        //sự kiện người chơi đáng một nược
         socket.on('move', (x, y) => {
-            try {
-                match.move(x, y, socket.data.id);
-            } catch (error) {}
-
-            io.to(roomId).emit('sync match', {
-                id: roomId,
-                players: {
-                    player1: {
-                        ...match.Players.player1,
-                        timeout: {
-                            ...match.Players.player1.timeout,
-                            timeoutId: undefined,
-                        },
-                    },
-                    player2: {
-                        ...match.Players.player2,
-                        timeout: {
-                            ...match.Players.player2.timeout,
-                            timeoutId: undefined,
-                        },
-                    },
-                },
-                mode: match.Mode,
-                currentPlayer: match.CurrentPLayer,
-                board: match.Caro.Board,
-                matchResult: match.MatchResult,
-            });
+            match.move(x, y, socket.data.id);
         });
     });
 });

@@ -19,6 +19,8 @@ const SignInSchema = z.object({
     password: z.coerce.string(),
 });
 
+// tạo các phưng thức xác thực cho ứng dụng
+
 const factory = new Factory();
 
 export const authHandlers = factory.createHandlers((c) => {
@@ -121,6 +123,7 @@ export const createToken = (payload: object, expires: number) => {
     );
 };
 
+//!
 export const parseToken = (token: string) => {
     const t = unsignCookie(token);
     if (!t) return undefined;
