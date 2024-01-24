@@ -14,7 +14,7 @@ import router from '@/router';
 import { Server } from 'socket.io';
 import { auth, parseToken } from '@/auth';
 import { CORS } from '@/lib/utils/constant';
-import GameQueue from './lib/game-queue';
+import GameQueueMode, { GameQueue } from './lib/game-queue';
 import GameCache from './lib/cache';
 import Match from './lib/match';
 import appEmitter from './lib/event';
@@ -62,9 +62,7 @@ const io = new Server<
 const gameCache = new GameCache(io);
 
 //khởi tạo hàng các đợi
-const matchQueue3x3 = new GameQueue(gameCache, 3);
-const matchQueue5x5 = new GameQueue(gameCache, 5);
-const matchQueue7x7 = new GameQueue(gameCache, 7);
+const gameQueue = new GameQueue(gameCache);
 
 // xác thực người dùng
 io.use((socket, next) => {
@@ -83,44 +81,15 @@ io.on('connect', (socket) => {
     socket.join(socket.data.id);
 
     socket.on('find match', (mode) => {
-        switch (mode) {
-            case 3:
-                matchQueue3x3.offer({
-                    id: socket.data.id,
-                    name: socket.data.name,
-                });
-                break;
-            case 5:
-                matchQueue5x5.offer({
-                    id: socket.data.id,
-                    name: socket.data.name,
-                });
-                break;
-            case 7:
-                matchQueue7x7.offer({
-                    id: socket.data.id,
-                    name: socket.data.name,
-                });
-                break;
-            default:
-                break;
-        }
-        console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
+        gameQueue.offer(mode, { id: socket.data.id, name: socket.data.name });
     });
 
     socket.on('cancel find match', () => {
-        matchQueue3x3.remove((e) => e.id === socket.data.id);
-        matchQueue5x5.remove((e) => e.id === socket.data.id);
-        matchQueue7x7.remove((e) => e.id === socket.data.id);
-
-        console.log(matchQueue3x3.data, matchQueue5x5.data, matchQueue7x7.data);
+        gameQueue.remove({ id: socket.data.id, name: socket.data.name });
     });
 
     socket.on('disconnect', () => {
-        matchQueue3x3.remove((e) => e.id === socket.data.id);
-        matchQueue5x5.remove((e) => e.id === socket.data.id);
-        matchQueue7x7.remove((e) => e.id === socket.data.id);
-        console.log('disconnect:', socket.id);
+        gameQueue.remove({ id: socket.data.id, name: socket.data.name });
     });
 
     socket.on('join room', (roomId) => {

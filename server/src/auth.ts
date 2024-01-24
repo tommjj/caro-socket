@@ -133,11 +133,11 @@ export const parseToken = (token: string) => {
         if (payload.expires < Date.now()) return false;
         return payload;
     } catch (e) {
-        const payload = JSON.parse(
-            RegExp(/(\{.*?\})/).exec(unBase64(token))?.[0]!
-        );
-
         try {
+            const payload = JSON.parse(
+                RegExp(/(\{.*?\})/).exec(unBase64(token))?.[0]!
+            );
+
             if (payload.expires < Date.now()) return false;
             return payload;
         } catch (error) {

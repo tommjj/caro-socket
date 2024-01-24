@@ -30,6 +30,7 @@ export interface ClientToServerEvents {
     move: (x: number, y: number) => void;
     'join room': (roomId: string) => void;
     'leave room': (roomId: string) => void;
+    'draw request': () => void;
 }
 
 export interface InterServerEvents {

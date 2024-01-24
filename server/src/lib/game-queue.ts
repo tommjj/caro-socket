@@ -1,6 +1,6 @@
 import Queue from './queue';
 import GameCache from './cache';
-import { GameMode } from './game-mode';
+import { GameMode, Modes } from './game-mode';
 
 export type User = {
     id: string;
@@ -8,7 +8,7 @@ export type User = {
 };
 
 // hàng đợi tiềm trận
-export default class GameQueue extends Queue<User> {
+export default class GameQueueMode extends Queue<User> {
     private gameCache;
     private mode;
     constructor(gameCache: GameCache, mode: GameMode) {
@@ -25,5 +25,38 @@ export default class GameQueue extends Queue<User> {
         } else {
             super.offer(player);
         }
+    }
+}
+
+export class GameQueue {
+    private gameQueueModes: {
+        [key in GameMode]?: GameQueueMode;
+    } = {};
+
+    constructor(gameCache: GameCache) {
+        Object.keys(Modes)
+            .map((m) => Number(m))
+            .map((m) => {
+                const t = m as GameMode;
+                this.gameQueueModes[t] = new GameQueueMode(
+                    gameCache,
+                    m as GameMode
+                );
+            });
+    }
+
+    offer(mode: GameMode, player: User) {
+        this.gameQueueModes[mode]?.offer(player);
+    }
+
+    remove(player: User) {
+        Object.keys(this.gameQueueModes).forEach((k) => {
+            const t = Number(k) as GameMode;
+            this.gameQueueModes[t]?.remove((e) => e.id === player.id);
+        });
+    }
+
+    getGameQueueMode(mode: GameMode) {
+        return this.gameQueueModes[mode];
     }
 }

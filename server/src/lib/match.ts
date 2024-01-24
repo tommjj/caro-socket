@@ -6,7 +6,7 @@ import {
     ServerToClientEvents,
     SocketData,
 } from '@/socket/types';
-import { GameMode } from './game-mode';
+import { GameMode, getGameMode as gm } from './game-mode';
 import appEmitter from './event';
 
 export type Timeout = {
@@ -29,17 +29,6 @@ export type Players = {
     player2: Player;
 };
 
-const getTimeout = (mode: GameMode) => {
-    switch (mode) {
-        case 3:
-            return 1000 * 40;
-        case 5:
-            return 1000 * 60 * 2;
-        case 7:
-            return 1000 * 60 * 3;
-    }
-};
-
 // class sư lý một trận đấu
 export default class Match {
     private isStart: boolean = false;
@@ -50,6 +39,7 @@ export default class Match {
     private io;
     private mode;
     private matchResult: string | null | undefined;
+    private drawRequest: string | undefined;
 
     constructor(
         io: Server<
@@ -79,7 +69,7 @@ export default class Match {
                     timeoutId: undefined,
                     isCount: false,
                     lastTime: Date.now(),
-                    TimeRemaining: getTimeout(mode),
+                    TimeRemaining: gm(mode).timeout,
                 },
             },
             player2: {
@@ -90,26 +80,19 @@ export default class Match {
                     timeoutId: undefined,
                     isCount: false,
                     lastTime: Date.now(),
-                    TimeRemaining: getTimeout(mode),
+                    TimeRemaining: gm(mode).timeout,
                 },
             },
         };
 
-        switch (mode) {
-            case 3:
-                this.caro = new Caro(3, 3, 3);
-                this.numberOfMatch = 7;
-                break;
-            case 5:
-                this.caro = new Caro(5, 5, 4);
-                this.numberOfMatch = 5;
-                break;
-            case 7:
-                this.caro = new Caro(7, 7, 5);
-                this.numberOfMatch = 3;
-                break;
-        }
+        this.caro = new Caro(
+            gm(mode).width,
+            gm(mode).height,
+            gm(mode).lengthToWin
+        );
+        this.numberOfMatch = gm(mode).numberOfMatch;
     }
+
     get Id() {
         return this.id;
     }
@@ -245,12 +228,13 @@ export default class Match {
     }
 
     newRound() {
+        this.drawRequest = undefined;
         this.caro.reset();
 
         this.clearTimeoutById(this.players.player1.id);
         this.clearTimeoutById(this.players.player2.id);
-        this.players.player1.timeout.TimeRemaining = getTimeout(this.mode);
-        this.players.player2.timeout.TimeRemaining = getTimeout(this.mode);
+        this.players.player1.timeout.TimeRemaining = gm(this.mode).timeout;
+        this.players.player2.timeout.TimeRemaining = gm(this.mode).timeout;
 
         setTimeout(() => {
             this.handleSetTimeout();
