@@ -2,10 +2,12 @@ import { FaRegCircle } from 'react-icons/fa';
 
 import useGameStore, { PointState, Timeout } from '@/lib/store/store';
 import { checkWinner, cn } from '@/lib/utils';
+import { getGameMode as gm } from '@/lib/game-mode';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { useCallback, useEffect, useState } from 'react';
 import socket from '@/lib/socket';
 import MatchResult from './match-result';
+import { ImExit } from 'react-icons/im';
 
 const Timer = ({ timeout }: { timeout: Timeout }) => {
     const [count, setCount] = useState(0);
@@ -44,8 +46,7 @@ const Timer = ({ timeout }: { timeout: Timeout }) => {
 
     return (
         <span
-            className={cn({
-                'transition-all': true,
+            className={cn('transition-all', {
                 'text-7xl': timeout.isCount,
                 'animate-pulse-fast': count <= 10,
             })}
@@ -60,8 +61,8 @@ const PofBoard = ({
     y,
     type,
     isWinLine,
-    inTurn: hover,
-    playerType: hoverType,
+    inTurn,
+    playerType,
 }: {
     x: number;
     y: number;
@@ -77,10 +78,13 @@ const PofBoard = ({
 
     return (
         <div
-            className="bg-dark flex p-1 text-gray text-lg leading-[0.8] relative"
+            className={cn(
+                'bg-dark flex p-1 text-gray text-lg leading-[0.8] relative',
+                { 'cursor-pointer': inTurn }
+            )}
             onClick={handleClick}
         >
-            <div className="flex justify-center items-center absolute top-1 left-1">{`${x},${y}`}</div>
+            <div className="flex justify-center items-center absolute top-1 left-1 select-none text-sm">{`${x},${y}`}</div>
             {type ? (
                 <div className="flex justify-center items-center relative w-full h-full text-light">
                     {type === PointState.O ? (
@@ -101,9 +105,9 @@ const PofBoard = ({
                         ></XMarkIcon>
                     )}
                 </div>
-            ) : hover ? (
+            ) : inTurn ? (
                 <div className="flex justify-center items-center relative w-full h-full text-dark hover:text-gray">
-                    {hoverType === PointState.O ? (
+                    {playerType === PointState.O ? (
                         <FaRegCircle
                             className={cn(
                                 'relative w-[80%] h-[80%] transition-all'
@@ -132,10 +136,11 @@ const Board = () => {
 
     return (
         <div
-            className={cn('h-[600px] w-[600px] bg-light animate-grow', {
+            className={cn('h-full aspect-square bg-light animate-grow', {
                 'grid grid-cols-3 grid-rows-3 gap-0.5': mode === 3,
                 'grid grid-cols-5 grid-rows-5 gap-0.5': mode === 5,
                 'grid grid-cols-7 grid-rows-7 gap-0.5': mode === 7,
+                'grid grid-cols-12 grid-rows-12 gap-0.5': mode === 12,
             })}
         >
             {board.map((x, ix) =>
@@ -259,6 +264,97 @@ const RightSide = () => {
     );
 };
 
+const TopSide = () => {
+    const opponents = useGameStore((s) => s.match?.opponents)!;
+    const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
+
+    return (
+        <div
+            className={cn(
+                'flex flex-col relative h-1/2 aspect-square text-dark cursor-default',
+                { 'text-light': currentTurn !== opponents.type }
+            )}
+        >
+            <div className="flex px-3 py-2 transition-all">
+                <div className="flex-grow">
+                    <h2 className="text-2xl font-medium">{opponents.name}</h2>
+                    <p className="text-base">Team: {opponents.type}</p>
+                </div>
+                <div className="text-6xl">
+                    <span className="text-base">w:</span>0{opponents.score}
+                </div>
+            </div>
+
+            <div className="relative flex-grow overflow-hidden">
+                <div className="absolute top-0 right-3 text-3xl px-1">
+                    <Timer timeout={opponents.timeout}></Timer>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BottomSide = () => {
+    const player = useGameStore((s) => s.match?.player)!;
+    const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
+
+    return (
+        <div
+            className={cn(
+                'flex flex-col relative h-1/2 aspect-square text-dark cursor-default',
+                { 'text-light': currentTurn !== player.type }
+            )}
+        >
+            <div className="relative flex-grow overflow-hidden">
+                <div className="absolute bottom-0 right-3 text-3xl px-1">
+                    <Timer timeout={player.timeout}></Timer>
+                </div>
+            </div>
+
+            <div className="flex px-3 py-2 transition-all">
+                <div className="flex-grow ">
+                    <h2 className="text-2xl font-medium">{player.name}</h2>
+                    <p className="text-base ">Team: {player.type}</p>
+                </div>
+                <div className="text-6xl">
+                    <span className="text-base">w:</span>0{player.score}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const PlayersBar = () => {
+    const player = useGameStore((s) => s.match?.player)!;
+    const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
+
+    return (
+        <aside className="relative h-full text-dark bg-dark border-l border-light">
+            <div
+                className={cn(
+                    'absolute left-0 top-0 h-1/2 bg-light aspect-square transition-all',
+                    {
+                        'translate-y-[100%]': player.type === currentTurn,
+                    }
+                )}
+            ></div>
+            <TopSide />
+            {/* ------------------- */}
+            <BottomSide />
+        </aside>
+    );
+};
+
+const OutGameSide = () => {
+    return (
+        <aside className="flex h-full w-14 ml-2 pt-3">
+            <div className="flex justify-end text-gray w-full text-5xl transform scale-x-[-1]">
+                <ImExit></ImExit>
+            </div>
+        </aside>
+    );
+};
+
 const Match = ({ roomId }: { roomId: string }) => {
     const matchResult = useGameStore((s) => s.match?.matchResult)!;
 
@@ -266,13 +362,12 @@ const Match = ({ roomId }: { roomId: string }) => {
         <>
             {matchResult === undefined ? null : <MatchResult />}
             <div className="flex w-full h-full bg-dark text-white">
-                <LeftSide />
-
-                <div className="flex justify-center items-center h-full flex-grow min-w-96 px-9">
-                    <Board></Board>
+                <OutGameSide />
+                <div className="flex justify-center items-center h-full flex-grow min-w-96 p-5">
+                    <Board />
                 </div>
 
-                <RightSide />
+                <PlayersBar />
             </div>
         </>
     );

@@ -55,7 +55,7 @@ const Game = () => {
 
     useEffect(() => {
         if (roomId) {
-            setGameStore((priv) => ({ findMatch: false }));
+            setGameStore(() => ({ findMatch: false }));
 
             socket.emit('join room', roomId);
         }

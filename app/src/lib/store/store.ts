@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { User } from '../zod.schema';
+import { GameMode, getNextMode, getPrivMode } from '../game-mode';
 
 // store nơi lưu các biến toàn cục của ứng dụng
 
@@ -9,8 +10,6 @@ export enum PointState {
     X = 'X',
     O = 'O',
 }
-
-export type GameMode = 3 | 5 | 7;
 
 export type Timeout = {
     TimeRemaining: number;
@@ -64,18 +63,7 @@ const useGameStore = create<Data & Action>()((set) => ({
     setUser: (user) => set(() => ({ user: user })),
     setMode: (dir) =>
         set((priv) => ({
-            mode:
-                priv.mode === 5
-                    ? dir > 0
-                        ? 7
-                        : 3
-                    : priv.mode === 7
-                    ? dir > 0
-                        ? 7
-                        : 5
-                    : dir > 0
-                    ? 5
-                    : 3,
+            mode: dir > 0 ? getNextMode(priv.mode) : getPrivMode(priv.mode),
         })),
 }));
 

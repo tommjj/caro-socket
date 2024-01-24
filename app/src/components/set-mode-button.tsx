@@ -7,13 +7,14 @@ import {
 } from '@heroicons/react/24/outline';
 import {} from '@heroicons/react/24/solid';
 import { useCallback } from 'react';
+import { GameMode, getGameMode as gm } from '@/lib/game-mode';
 
 export const Board = ({
     className = '',
-    size,
+    mode,
 }: {
     className?: string;
-    size: number;
+    mode: GameMode;
 }) => {
     return (
         <div
@@ -23,7 +24,7 @@ export const Board = ({
             )}
         >
             <div className="flex justify-evenly absolute top-0 left-0 w-[500px] h-[500px]">
-                {Array.from({ length: size - 1 }, (x, i) => (
+                {Array.from({ length: gm(mode).width - 1 }, (x, i) => (
                     <span
                         key={i}
                         className="block w-[10px] h-full rounded-full bg-gray "
@@ -31,7 +32,7 @@ export const Board = ({
                 ))}
             </div>
             <div className="flex flex-col justify-evenly absolute top-0 left-0 w-[500px] h-[500px]">
-                {Array.from({ length: size - 1 }, (x, i) => (
+                {Array.from({ length: gm(mode).height - 1 }, (x, i) => (
                     <span
                         key={i}
                         className="block w-full h-[10px] rounded-full bg-gray"
@@ -59,19 +60,19 @@ export const ModeDisplay = () => {
                 CARO
             </div>
 
-            <Board size={mode} />
+            <Board mode={mode} />
             <div className="relative text-[12rem] leading-none select-none font-medium text-white pl-5 mb-2 ">
                 <p className="text-base leading-[0.8] font-medium px-1">m:</p>
                 <p className="leading-[0.8] drop-shadow-sm">
-                    {`${mode}`}
+                    {`${gm(mode).width}`}
                     <span className="text-6xl">
                         <XMarkIcon
                             className="text-6xl h-16 inline"
                             strokeWidth={2}
                         />
                     </span>
-                    {`${mode}`}
-                    <span className="text-6xl">r{10 - mode}</span>
+                    {`${gm(mode).height}`}
+                    <span className="text-6xl">r{gm(mode).numberOfMatch}</span>
                 </p>
             </div>
             <div className="flex justify-between px-6 relative h-28 w-[500px] text-6xl text-dark">

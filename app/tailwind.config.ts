@@ -99,6 +99,16 @@ const config = {
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
             },
+            gridTemplateColumns: {
+                '12': 'repeat(12, minmax(0, 1fr))',
+                '30': 'repeat(30, minmax(0, 1fr))',
+                '50': 'repeat(50, minmax(0, 1fr))',
+            },
+            gridTemplateRows: {
+                '12': 'repeat(12, minmax(0, 1fr))',
+                '30': 'repeat(30, minmax(0, 1fr))',
+                '50': 'repeat(50, minmax(0, 1fr))',
+            },
         },
     },
     plugins: [require('tailwindcss-animate')],

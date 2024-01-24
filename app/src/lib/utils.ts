@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { GameMode, PointState } from './store/store';
+import { PointState } from './store/store';
+import { GameMode, getGameMode as gm } from './game-mode';
 
 export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -29,7 +30,7 @@ const getPoint = (
 
 // kiểm tra điểm có nằm trong bàn cờ không
 const isInBoard = (x: number, y: number, mode: GameMode) => {
-    return x >= 0 && x < mode && y >= 0 && y < mode;
+    return x >= 0 && x < gm(mode).width && y >= 0 && y < gm(mode).height;
 };
 
 // kiểm tra điểm x, y có nằm trên đường tạo chiến thắng không
@@ -43,7 +44,7 @@ export const checkWinner = (
 
     if (!p) return false;
 
-    const lengthToWin = mode === 3 ? 3 : mode === 5 ? 4 : 5;
+    const lengthToWin = gm(mode).lengthToWin;
 
     let xx = {
         count: 0,
@@ -100,7 +101,6 @@ export const checkWinner = (
         xy.count === lengthToWin - 1 ||
         yx.count === lengthToWin - 1
     ) {
-        console.log(lengthToWin);
         return true;
     }
     return false;

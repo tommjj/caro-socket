@@ -1,8 +1,9 @@
 'use client';
 
 import { Socket, io } from 'socket.io-client';
-import { GameMode, Players, PointState, setGameStore } from './store/store';
+import { Players, PointState, setGameStore } from './store/store';
 import { API_HOST } from './http';
+import { GameMode } from './game-mode';
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
