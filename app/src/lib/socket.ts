@@ -22,6 +22,10 @@ export interface ServerToClientEvents {
     'win match': (id: string) => void;
     'draw round': (id: string) => void;
     'draw match': (id: string) => void;
+    'not found': () => void;
+    'new round': () => void;
+    'draw request': () => void;
+    'cancel draw request': () => void;
 }
 
 export interface ClientToServerEvents {
@@ -31,6 +35,9 @@ export interface ClientToServerEvents {
     move: (x: number, y: number) => void;
     'join room': (roomId: string) => void;
     'leave room': (roomId: string) => void;
+    'draw request': () => void;
+    'cancel draw request': () => void;
+    'set icon': (icon: string) => void;
 }
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(

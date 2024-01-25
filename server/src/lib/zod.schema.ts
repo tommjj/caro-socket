@@ -9,8 +9,8 @@ export const UserSchema = z.object({
 export type User = z.infer<typeof UserSchema>;
 
 export const CreateUserSchema = z.object({
-    name: z.string(),
-    password: z.coerce.string(),
+    name: z.string().min(2).max(15),
+    password: z.coerce.string().min(4).max(30),
     avatar: z.string().default('default_avatar.png'),
 });
 export type CreateUser = z.infer<typeof CreateUserSchema>;

@@ -227,7 +227,25 @@ export default class Match {
         }
     }
 
+    handleDrawRequest(playerId: string) {
+        if (!this.drawRequest) {
+            this.io.to(this.id).emit('draw request');
+            this.drawRequest = playerId;
+            return;
+        }
+
+        if (playerId !== this.drawRequest) {
+            this.handleDraw();
+        }
+    }
+
+    handleCancelDrawRequest() {
+        this.io.to(this.id).emit('cancel draw request');
+        this.drawRequest = undefined;
+    }
+
     newRound() {
+        this.io.to(this.id).emit('new round');
         this.drawRequest = undefined;
         this.caro.reset();
 

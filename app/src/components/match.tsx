@@ -1,4 +1,5 @@
 import { FaRegCircle } from 'react-icons/fa';
+import { LiaTimesSolid } from 'react-icons/lia';
 
 import useGameStore, { PointState, Timeout } from '@/lib/store/store';
 import { checkWinner, cn } from '@/lib/utils';
@@ -8,6 +9,7 @@ import { useCallback, useEffect, useState } from 'react';
 import socket from '@/lib/socket';
 import MatchResult from './match-result';
 import { ImExit } from 'react-icons/im';
+import { FaRegHandshake } from 'react-icons/fa';
 
 const Timer = ({ timeout }: { timeout: Timeout }) => {
     const [count, setCount] = useState(0);
@@ -106,7 +108,7 @@ const PofBoard = ({
                     )}
                 </div>
             ) : inTurn ? (
-                <div className="flex justify-center items-center relative w-full h-full text-dark hover:text-gray">
+                <div className="flex justify-center items-center relative w-full h-full text-[#00000000] hover:text-gray">
                     {playerType === PointState.O ? (
                         <FaRegCircle
                             className={cn(
@@ -294,6 +296,84 @@ const TopSide = () => {
     );
 };
 
+const DrawRequestButton = () => {
+    const [isClick, setIsClick] = useState(false);
+    const [isClickToDraw, setIsClickToDraw] = useState(false);
+
+    const player = useGameStore((s) => s.match?.player)!;
+    const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
+
+    const handleDrawRequest = useCallback(() => {
+        setIsClick(true);
+        socket.emit('draw request');
+    }, []);
+
+    const handleCancelDrawRequest = useCallback(() => {
+        setIsClick(false);
+        socket.emit('cancel draw request');
+    }, []);
+
+    useEffect(() => {
+        const handleNewRound = () => {
+            setIsClick(false);
+            setIsClickToDraw(false);
+        };
+
+        const handleHasDrawRequest = () => {
+            setIsClickToDraw(true);
+        };
+
+        socket.on('new round', handleNewRound);
+        socket.on('draw request', handleHasDrawRequest);
+        socket.on('cancel draw request', handleNewRound);
+
+        return () => {
+            socket.off('new round', handleNewRound);
+            socket.off('draw request', handleHasDrawRequest);
+            socket.off('cancel draw request', handleNewRound);
+        };
+    }, []);
+
+    return (
+        <div className="flex absolute top-3 right-3">
+            {isClick ? (
+                <button
+                    onClick={handleCancelDrawRequest}
+                    className={cn(
+                        'flex items-center  px-3 py-1 rounded-full border border-dark',
+                        { 'border-light': player.type !== currentTurn }
+                    )}
+                >
+                    <LiaTimesSolid /> <span className="ml-1">Cancel</span>
+                </button>
+            ) : (
+                <>
+                    {isClickToDraw ? (
+                        <button
+                            onClick={handleCancelDrawRequest}
+                            className={cn(
+                                'flex items-center  px-3 py-1 rounded-full border border-dark mr-1',
+                                { 'border-light': player.type !== currentTurn }
+                            )}
+                        >
+                            <LiaTimesSolid />{' '}
+                        </button>
+                    ) : null}
+                    <button
+                        onClick={handleDrawRequest}
+                        className={cn(
+                            'flex items-center px-3 py-1 rounded-full border border-dark',
+                            { 'border-light': player.type !== currentTurn }
+                        )}
+                    >
+                        <FaRegHandshake /> <span className="ml-1">Draw</span>
+                    </button>
+                </>
+            )}
+        </div>
+    );
+};
+
 const BottomSide = () => {
     const player = useGameStore((s) => s.match?.player)!;
     const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
@@ -306,6 +386,8 @@ const BottomSide = () => {
             )}
         >
             <div className="relative flex-grow overflow-hidden">
+                <DrawRequestButton />
+
                 <div className="absolute bottom-0 right-3 text-3xl px-1">
                     <Timer timeout={player.timeout}></Timer>
                 </div>
@@ -329,7 +411,7 @@ const PlayersBar = () => {
     const currentTurn = useGameStore((s) => s.match?.currentPlayer)!;
 
     return (
-        <aside className="relative h-full text-dark bg-dark border-l border-light">
+        <aside className="relative h-full text-dark bg-dark border-l border-light animate-down-up">
             <div
                 className={cn(
                     'absolute left-0 top-0 h-1/2 bg-light aspect-square transition-all',

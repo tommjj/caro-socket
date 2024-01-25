@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { PointState } from './store/store';
 
 export const UserSchema = z.object({
     id: z.string(),

@@ -56,14 +56,14 @@ export const ModeDisplay = () => {
 
     return (
         <div className="flex flex-col justify-end absolute left-28 bottom-6 h-full z-10">
-            <div className="absolute top-6 text-white text-[14.5rem]  z-20 leading-[0.8] select-none drop-shadow-sm">
-                CARO
+            <div className="flex items-end absolute top-6 text-white text-[14.5rem] tracking-tight z-20 leading-[0.8] select-none drop-shadow-sm">
+                C <span className="text-[13rem]">ARO</span>
             </div>
 
             <Board mode={mode} />
             <div className="relative text-[12rem] leading-none select-none font-medium text-white pl-5 mb-2 ">
-                <p className="text-base leading-[0.8] font-medium px-1">m:</p>
-                <p className="leading-[0.8] drop-shadow-sm">
+                <p className="text-base leading-[0.8] px-1">m:</p>
+                <p className="leading-[0.8] font-normal drop-shadow-sm">
                     {`${gm(mode).width}`}
                     <span className="text-6xl">
                         <XMarkIcon

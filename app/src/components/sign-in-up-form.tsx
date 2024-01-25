@@ -111,6 +111,7 @@ export const SignInForm = () => {
                         label="Username"
                         onChange={handleChangeUsername}
                         value={formState.username}
+                        autoFocus
                         required
                     />
                     <Input
@@ -227,6 +228,7 @@ export const SignUpForm = () => {
                         label="Username"
                         onChange={handleChangeUsername}
                         value={formState.username}
+                        autoFocus
                         required
                     />
                     <p className="text-red-500 px-1">

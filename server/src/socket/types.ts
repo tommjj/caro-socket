@@ -21,6 +21,10 @@ export interface ServerToClientEvents {
     'win match': (id: string) => void;
     'draw round': () => void;
     'draw match': () => void;
+    'not found': () => void;
+    'new round': () => void;
+    'draw request': () => void;
+    'cancel draw request': () => void;
 }
 
 export interface ClientToServerEvents {
@@ -31,6 +35,7 @@ export interface ClientToServerEvents {
     'join room': (roomId: string) => void;
     'leave room': (roomId: string) => void;
     'draw request': () => void;
+    'cancel draw request': () => void;
 }
 
 export interface InterServerEvents {

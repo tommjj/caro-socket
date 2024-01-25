@@ -95,10 +95,10 @@ io.on('connect', (socket) => {
     socket.on('join room', (roomId) => {
         //kiểm tra màng chơi có trong cache và người chơi đó có là một người chơi trong phòng không
         const match = gameCache.Cache.get(roomId) as Match | undefined;
-        if (!match) return;
+        if (!match) return socket.emit('not found');
 
         const isInRoom = match.isUserInMatch(socket.data.id);
-        if (!isInRoom) return;
+        if (!isInRoom) return socket.emit('not found');
 
         socket.data.room && socket.leave(socket.data.room);
         socket.data.room = roomId;
@@ -112,6 +112,14 @@ io.on('connect', (socket) => {
         //sự kiện người chơi đáng một nược
         socket.on('move', (x, y) => {
             match.move(x, y, socket.data.id);
+        });
+
+        socket.on('draw request', () => {
+            match.handleDrawRequest(socket.data.id);
+        });
+
+        socket.on('cancel draw request', () => {
+            match.handleCancelDrawRequest();
         });
     });
 });

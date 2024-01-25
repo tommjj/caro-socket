@@ -51,7 +51,7 @@ export const Counter = () => {
                 ></div>
             </div>
 
-            <div className="z-10 relative select-none">
+            <div className="z-10 relative font-normal select-none">
                 {count}
                 <span className="text-2xl">/s</span>
             </div>
