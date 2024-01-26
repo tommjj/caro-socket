@@ -19,11 +19,11 @@ export const Board = ({
     return (
         <div
             className={cn(
-                'absolute left-3 bottom-0 z-0 w-[500px] h-[500px]',
+                'absolute left-3 bottom-0 z-0 w-[520px] h-[520px]',
                 className
             )}
         >
-            <div className="flex justify-evenly absolute top-0 left-0 w-[500px] h-[500px]">
+            <div className="flex justify-evenly absolute top-0 left-0 w-[520px] h-[520px]">
                 {Array.from({ length: gm(mode).width - 1 }, (x, i) => (
                     <span
                         key={i}
@@ -31,7 +31,7 @@ export const Board = ({
                     ></span>
                 ))}
             </div>
-            <div className="flex flex-col justify-evenly absolute top-0 left-0 w-[500px] h-[500px]">
+            <div className="flex flex-col justify-evenly absolute top-0 left-0 w-[520px] h-[520px]">
                 {Array.from({ length: gm(mode).height - 1 }, (x, i) => (
                     <span
                         key={i}
@@ -55,9 +55,9 @@ export const ModeDisplay = () => {
     }, [setMode]);
 
     return (
-        <div className="flex flex-col justify-end absolute left-28 bottom-6 h-full z-10">
-            <div className="flex items-end absolute top-6 text-white text-[14.5rem] tracking-tight z-20 leading-[0.8] select-none drop-shadow-sm">
-                C <span className="text-[13rem]">ARO</span>
+        <div className="flex flex-col justify-end absolute left-24 bottom-6 h-full z-10">
+            <div className="flex items-end absolute top-6 text-white font-normal text-[14.5rem] z-20 leading-[0.8] select-none drop-shadow-sm">
+                <h1>CARO</h1>
             </div>
 
             <Board mode={mode} />
@@ -65,9 +65,9 @@ export const ModeDisplay = () => {
                 <p className="text-base leading-[0.8] px-1">m:</p>
                 <p className="leading-[0.8] font-normal drop-shadow-sm">
                     {`${gm(mode).width}`}
-                    <span className="text-6xl">
+                    <span className="text-7xl">
                         <XMarkIcon
-                            className="text-6xl h-16 inline"
+                            className="text-7xl h-24 inline"
                             strokeWidth={2}
                         />
                     </span>

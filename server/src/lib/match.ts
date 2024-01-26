@@ -245,7 +245,6 @@ export default class Match {
     }
 
     newRound() {
-        this.io.to(this.id).emit('new round');
         this.drawRequest = undefined;
         this.caro.reset();
 
@@ -255,6 +254,7 @@ export default class Match {
         this.players.player2.timeout.TimeRemaining = gm(this.mode).timeout;
 
         setTimeout(() => {
+            this.io.to(this.id).emit('new round');
             this.handleSetTimeout();
             this.sync();
         }, 700);
@@ -284,6 +284,17 @@ export default class Match {
             board: this.Caro.Board,
             matchResult: this.MatchResult,
         };
+    }
+
+    handleLeave(id: string) {
+        this.matchResult =
+            this.players.player1.id === id
+                ? this.players.player2.id
+                : this.players.player1.id;
+
+        this.sync();
+
+        appEmitter.emit('end match', this.id);
     }
 
     sync() {

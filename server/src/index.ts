@@ -121,6 +121,10 @@ io.on('connect', (socket) => {
         socket.on('cancel draw request', () => {
             match.handleCancelDrawRequest();
         });
+
+        socket.on('leave room', () => {
+            match.handleLeave(socket.data.id);
+        });
     });
 });
 

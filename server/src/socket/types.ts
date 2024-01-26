@@ -33,7 +33,7 @@ export interface ClientToServerEvents {
     'cancel find match': () => void;
     move: (x: number, y: number) => void;
     'join room': (roomId: string) => void;
-    'leave room': (roomId: string) => void;
+    'leave room': () => void;
     'draw request': () => void;
     'cancel draw request': () => void;
 }

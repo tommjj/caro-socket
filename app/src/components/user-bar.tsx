@@ -24,7 +24,7 @@ export const UserTopBar = ({ className }: { className?: string }) => {
                     className
                 )}
             >
-                <div className="flex items-end text-6xl leading-[1.05] h-24 font-bold text-dark bg-light select-none tracking-tight px-4 w-full">
+                <div className="flex items-end text-5xl leading-[1.05] h-20 font-bold text-dark bg-light select-none tracking-tight px-4 w-full">
                     <div>{user ? user.name : 'YOUR NAME'}</div>
                 </div>
             </div>
