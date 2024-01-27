@@ -15,9 +15,19 @@ import {
     FaRegFaceKissBeam,
     FaRegFaceGrinBeamSweat,
     FaRegFaceGrinHearts,
+    FaRegFaceMeh,
+    FaRegFaceMehBlank,
+    FaRegFaceLaughWink,
+    FaRegFaceLaughBeam,
 } from 'react-icons/fa6';
+import { TfiFaceSmile } from 'react-icons/tfi';
 
-export const icon = {
+export const IconList = {
+    TfiFaceSmile,
+    LaughBeam: FaRegFaceLaughBeam,
+    LaughWink: FaRegFaceLaughWink,
+    MehBlank: FaRegFaceMehBlank,
+    Meh: FaRegFaceMeh,
     Angry: FaRegFaceAngry,
     Dizzy: FaRegFaceDizzy,
     Flushed: FaRegFaceFlushed,
@@ -36,10 +46,10 @@ export const icon = {
     KissWinkHeart: FaRegFaceKissWinkHeart,
 };
 
-export type IconList = keyof typeof icon;
+export type IconType = keyof typeof IconList;
 
-const Icon = ({ iconType }: { iconType: IconList }) => {
-    const SelectedIcon = icon[iconType];
+const Icon = ({ iconType }: { iconType: IconType }) => {
+    const SelectedIcon = IconList[iconType];
     return (
         <>
             <SelectedIcon></SelectedIcon>

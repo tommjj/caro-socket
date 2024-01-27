@@ -25,6 +25,7 @@ export interface ServerToClientEvents {
     'new round': () => void;
     'draw request': () => void;
     'cancel draw request': () => void;
+    icon: (iconType: string) => void;
 }
 
 export interface ClientToServerEvents {
@@ -36,6 +37,7 @@ export interface ClientToServerEvents {
     'leave room': () => void;
     'draw request': () => void;
     'cancel draw request': () => void;
+    icon: (iconType: string) => void;
 }
 
 export interface InterServerEvents {

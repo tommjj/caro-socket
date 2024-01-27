@@ -4,6 +4,7 @@ import { Socket, io } from 'socket.io-client';
 import { Players, PointState, setGameStore } from './store/store';
 import { API_HOST } from './http';
 import { GameMode } from './game-mode';
+import { IconType } from '@/components/icon';
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
@@ -26,6 +27,7 @@ export interface ServerToClientEvents {
     'new round': () => void;
     'draw request': () => void;
     'cancel draw request': () => void;
+    icon: (iconType: IconType) => void;
 }
 
 export interface ClientToServerEvents {
@@ -38,6 +40,7 @@ export interface ClientToServerEvents {
     'draw request': () => void;
     'cancel draw request': () => void;
     'set icon': (icon: string) => void;
+    icon: (iconType: IconType) => void;
 }
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(

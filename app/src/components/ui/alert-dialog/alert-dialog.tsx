@@ -80,7 +80,7 @@ export function AlertDialogContent({
                           }}
                           style={{ pointerEvents: 'auto' }}
                       >
-                          <div className="flex flex-col w-full pt-4 bg-dark h-[35%] text-white animate-left-right">
+                          <div className="flex flex-col w-full pt-4 bg-dark h-[35%] text-white">
                               {children}
                           </div>
                       </div>,

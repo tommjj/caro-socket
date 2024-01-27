@@ -87,6 +87,9 @@ const config = {
                     from: { height: 'var(--radix-accordion-content-height)' },
                     to: { height: '0' },
                 },
+                'open-alert': {
+                    '0%': { transform: 'translateY(-100%)', opacity: '0' },
+                },
             },
             animation: {
                 'pulse-fast':
@@ -98,6 +101,7 @@ const config = {
                 'spin-slow': 'spin 30s linear infinite',
                 'accordion-down': 'accordion-down 0.2s ease-out',
                 'accordion-up': 'accordion-up 0.2s ease-out',
+                'open-alert': 'open-alert 0.2s ease-out',
             },
             gridTemplateColumns: {
                 '12': 'repeat(12, minmax(0, 1fr))',

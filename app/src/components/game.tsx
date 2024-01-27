@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import GameMenu from './game-menu';
 import socket, { connectSocket } from '@/lib/socket';
 import Match from './match';
+import GameMenuV2 from './game-menu-v2';
 
 const Loading = () => {
     return (

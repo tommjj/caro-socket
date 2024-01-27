@@ -125,6 +125,14 @@ io.on('connect', (socket) => {
         socket.on('leave room', () => {
             match.handleLeave(socket.data.id);
         });
+
+        socket.on('icon', (i) => {
+            io.to(
+                socket.data.id === match.Players.player1.id
+                    ? match.Players.player2.id
+                    : match.Players.player1.id
+            ).emit('icon', i);
+        });
     });
 });
 
