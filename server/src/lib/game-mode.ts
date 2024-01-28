@@ -4,7 +4,7 @@ export const Modes = {
         height: 3,
         lengthToWin: 3,
         numberOfMatch: 7,
-        timeout: 1000 * 60 * 60,
+        timeout: 1000 * 40,
     },
     5: {
         width: 5,

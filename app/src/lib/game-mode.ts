@@ -1,4 +1,4 @@
-const Modes = {
+export const Modes = {
     3: {
         width: 3,
         height: 3,

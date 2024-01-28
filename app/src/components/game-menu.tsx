@@ -6,10 +6,12 @@ import socket from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import useGameStore, { setGameStore } from '@/lib/store/store';
 
+import { getGameMode as gm } from '@/lib/game-mode';
 import { MoreOption, UserTopBar } from './user-bar';
 import { ModeDisplay } from './set-mode-button';
 import { Counter } from './counter';
 import { useRouter } from 'next/navigation';
+import { keyGameModes } from '@/lib/game-mode';
 
 const Ping = () => {
     const ping = useGameStore((s) => s.ping);
@@ -17,6 +19,31 @@ const Ping = () => {
     return (
         <div className="absolute top-[6px] left-0 text-light select-none">
             ping: {ping}ms
+        </div>
+    );
+};
+
+const ModeSelector = () => {
+    const selectedMode = useGameStore((s) => s.mode);
+
+    return (
+        <div className="flex items-center fixed bottom-0 left-0 w-full h-16 pr-[300px] px-3 pb-p">
+            {keyGameModes.map((m) => {
+                return (
+                    <button
+                        onClick={() => {
+                            setGameStore((p) => ({ mode: m }));
+                        }}
+                        key={m}
+                        className={cn(
+                            'flex justify-center items-center border border-light bg-dark hover:text-dark hover:bg-light transition-all text-xl text-light py-2 px-4 rounded-full w-24 mr-2',
+                            { 'w-36 text-dark bg-light': m === selectedMode }
+                        )}
+                    >
+                        {`${gm(m).width}x${gm(m).width}`}
+                    </button>
+                );
+            })}
         </div>
     );
 };
@@ -39,25 +66,28 @@ const PlayButton = () => {
         <button
             onClick={handleClick}
             className={cn(
-                'flex items-center absolute right-0 px-9 bottom-6 bg-light text-dark text-6xl font-semibold h-28 w-[26rem] shadow-md shadow-gray translate-x-2 hover:translate-x-0 transition-all pointer-events-auto',
-                {
-                    'before:w-2 before:h-full before:left-2 before:top-0 before:bg-dark before:absolute before:transition-all':
-                        true,
-                    'before:w-0': !findMatch,
-                }
+                'flex items-center justify-center absolute right-4 px-9 bottom-4 bg-light text-dark text-7xl font-medium h-28 w-[26rem] transition-all pointer-events-auto ring-0 ring-offset-4 ring-offset-dark border-dark',
+                { 'bg-dark border border-light text-light': findMatch }
             )}
         >
             <div
-                className={cn('absolute transition-all opacity-100', {
-                    'translate-x-40 opacity-0': findMatch,
-                })}
+                className={cn(
+                    'flex items-center absolute transition-all opacity-100',
+                    {
+                        'translate-x-40 opacity-0': findMatch,
+                    }
+                )}
             >
                 START
             </div>
             <div
-                className={cn('absolute transition-all opacity-100 ', {
-                    '-translate-x-40 opacity-0 pointer-events-none': !findMatch,
-                })}
+                className={cn(
+                    'flex items-center absolute transition-all opacity-100 ',
+                    {
+                        '-translate-x-40 opacity-0 pointer-events-none':
+                            !findMatch,
+                    }
+                )}
             >
                 CANCEL
             </div>

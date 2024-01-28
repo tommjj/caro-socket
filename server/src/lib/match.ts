@@ -294,6 +294,8 @@ export default class Match {
 
         this.sync();
 
+        this.clearTimeoutById(this.players.player1.id);
+        this.clearTimeoutById(this.players.player2.id);
         appEmitter.emit('end match', this.id);
     }
 
