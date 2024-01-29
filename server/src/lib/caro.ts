@@ -43,7 +43,7 @@ export default class Caro {
     getPoint(x: number, y: number) {
         if (!this.isInBoard(x, y)) return undefined;
 
-        return this.Board[x][y];
+        return this.board[x][y];
     }
 
     isOccupied(x: number, y: number) {
@@ -55,7 +55,7 @@ export default class Caro {
     }
 
     place(x: number, y: number) {
-        if (this.isOccupied(x, y) || !this.isInBoard(x, y)) {
+        if (!this.isInBoard(x, y) || this.isOccupied(x, y)) {
             return false;
         }
 
@@ -126,12 +126,7 @@ export default class Caro {
     }
 
     reset() {
-        this.board = new Array<Array<undefined | PointState>>(this.width);
-        for (let i = 0; i < this.width; i++) {
-            this.board[i] = new Array<undefined | PointState>(this.width).fill(
-                undefined
-            );
-        }
+        this.board.map((e) => e.fill(undefined));
         this.winner = null;
     }
 
