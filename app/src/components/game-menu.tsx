@@ -6,12 +6,10 @@ import socket from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import useGameStore, { setGameStore } from '@/lib/store/store';
 
-import { getGameMode as gm } from '@/lib/game-mode';
 import { MoreOption, UserTopBar } from './user-bar';
 import { ModeDisplay } from './set-mode-button';
 import { Counter } from './counter';
 import { useRouter } from 'next/navigation';
-import { keyGameModes } from '@/lib/game-mode';
 
 const Ping = () => {
     const ping = useGameStore((s) => s.ping);
@@ -19,31 +17,6 @@ const Ping = () => {
     return (
         <div className="absolute top-[6px] left-0 text-light select-none">
             ping: {ping}ms
-        </div>
-    );
-};
-
-const ModeSelector = () => {
-    const selectedMode = useGameStore((s) => s.mode);
-
-    return (
-        <div className="flex items-center fixed bottom-0 left-0 w-full h-16 pr-[300px] px-3 pb-p">
-            {keyGameModes.map((m) => {
-                return (
-                    <button
-                        onClick={() => {
-                            setGameStore((p) => ({ mode: m }));
-                        }}
-                        key={m}
-                        className={cn(
-                            'flex justify-center items-center border border-light bg-dark hover:text-dark hover:bg-light transition-all text-xl text-light py-2 px-4 rounded-full w-24 mr-2',
-                            { 'w-36 text-dark bg-light': m === selectedMode }
-                        )}
-                    >
-                        {`${gm(m).width}x${gm(m).width}`}
-                    </button>
-                );
-            })}
         </div>
     );
 };
