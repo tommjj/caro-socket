@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import { html } from 'hono/html';
+import { Server as ServerHttp, createServer } from 'node:https';
 
 import {
     ClientToServerEvents,
@@ -12,12 +12,12 @@ import {
 } from '@/socket/types';
 import router from '@/router';
 import { Server } from 'socket.io';
-import { auth, parseToken } from '@/auth';
+import { parseToken } from '@/auth';
 import { CORS } from '@/lib/utils/constant';
-import GameQueueMode, { GameQueue } from './lib/game-queue';
-import GameCache from './lib/cache';
-import Match from './lib/match';
-import appEmitter from './lib/event';
+import { GameQueue } from '@/lib/game-queue';
+import GameCache from '@/lib/cache';
+import Match from '@/lib/match';
+import appEmitter from '@/lib/event';
 
 const port = Number(process.env.PORT) || 8080;
 const app = new Hono();
@@ -88,10 +88,6 @@ io.on('connect', (socket) => {
         gameQueue.remove({ id: socket.data.id, name: socket.data.name });
     });
 
-    socket.on('disconnect', () => {
-        gameQueue.remove({ id: socket.data.id, name: socket.data.name });
-    });
-
     socket.on('join room', (roomId) => {
         //kiểm tra màng chơi có trong cache và người chơi đó có là một người chơi trong phòng không
         const match = gameCache.Cache.get(roomId) as Match | undefined;
@@ -108,31 +104,59 @@ io.on('connect', (socket) => {
 
         //gưi đồng bộ đến máy khách
         match.sync();
+    });
 
-        //sự kiện người chơi đáng một nược
-        socket.on('move', (x, y) => {
-            match.move(x, y, socket.data.id);
-        });
+    socket.on('move', (x, y) => {
+        const match = gameCache.Cache.get(socket.data.room) as
+            | Match
+            | undefined;
+        if (!match) return socket.emit('not found');
 
-        socket.on('draw request', () => {
-            match.handleDrawRequest(socket.data.id);
-        });
+        match.move(x, y, socket.data.id);
+    });
 
-        socket.on('cancel draw request', () => {
-            match.handleCancelDrawRequest();
-        });
+    socket.on('draw request', () => {
+        const match = gameCache.Cache.get(socket.data.room) as
+            | Match
+            | undefined;
+        if (!match) return socket.emit('not found');
 
-        socket.on('leave room', () => {
-            match.handleLeave(socket.data.id);
-        });
+        match.handleDrawRequest(socket.data.id);
+    });
 
-        socket.on('icon', (i) => {
-            io.to(
-                socket.data.id === match.Players.player1.id
-                    ? match.Players.player2.id
-                    : match.Players.player1.id
-            ).emit('icon', i);
-        });
+    socket.on('cancel draw request', () => {
+        const match = gameCache.Cache.get(socket.data.room) as
+            | Match
+            | undefined;
+        if (!match) return socket.emit('not found');
+
+        match.handleCancelDrawRequest();
+    });
+
+    socket.on('leave room', () => {
+        const match = gameCache.Cache.get(socket.data.room) as
+            | Match
+            | undefined;
+        if (!match) return socket.emit('not found');
+
+        match.handleLeave(socket.data.id);
+    });
+
+    socket.on('icon', (i) => {
+        const match = gameCache.Cache.get(socket.data.room) as
+            | Match
+            | undefined;
+        if (!match) return socket.emit('not found');
+
+        io.to(
+            socket.data.id === match.Players.player1.id
+                ? match.Players.player2.id
+                : match.Players.player1.id
+        ).emit('icon', i);
+    });
+
+    socket.on('disconnect', () => {
+        gameQueue.remove({ id: socket.data.id, name: socket.data.name });
     });
 });
 
