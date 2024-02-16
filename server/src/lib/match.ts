@@ -29,6 +29,39 @@ export type Players = {
     player2: Player;
 };
 
+function playersBuilder(
+    player1: { id: string; name: string },
+    player2: { id: string; name: string },
+    GameMode: GameMode
+): Players {
+    const randBool = Math.random() < 0.5;
+
+    return {
+        player1: {
+            ...player1,
+            score: 0,
+            type: randBool ? PointState.X : PointState.O,
+            timeout: {
+                timeoutId: undefined,
+                isCount: false,
+                lastTime: Date.now(),
+                TimeRemaining: gm(GameMode).timeout,
+            },
+        },
+        player2: {
+            ...player2,
+            score: 0,
+            type: !randBool ? PointState.X : PointState.O,
+            timeout: {
+                timeoutId: undefined,
+                isCount: false,
+                lastTime: Date.now(),
+                TimeRemaining: gm(GameMode).timeout,
+            },
+        },
+    };
+}
+
 // class sư lý một trận đấu
 export default class Match {
     private isStart: boolean = false;
@@ -58,32 +91,7 @@ export default class Match {
 
         this.mode = mode;
 
-        const randBool = Math.random() < 0.5;
-
-        this.players = {
-            player1: {
-                ...player1,
-                score: 0,
-                type: randBool ? PointState.X : PointState.O,
-                timeout: {
-                    timeoutId: undefined,
-                    isCount: false,
-                    lastTime: Date.now(),
-                    TimeRemaining: gm(mode).timeout,
-                },
-            },
-            player2: {
-                ...player2,
-                score: 0,
-                type: !randBool ? PointState.X : PointState.O,
-                timeout: {
-                    timeoutId: undefined,
-                    isCount: false,
-                    lastTime: Date.now(),
-                    TimeRemaining: gm(mode).timeout,
-                },
-            },
-        };
+        this.players = playersBuilder(player1, player2, mode);
 
         this.caro = new Caro(
             gm(mode).width,

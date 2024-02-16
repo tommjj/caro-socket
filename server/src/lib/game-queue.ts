@@ -8,7 +8,7 @@ export type User = {
 };
 
 // hàng đợi tiềm trận
-export default class GameQueueMode extends Queue<User> {
+export default class GameModeQueue extends Queue<User> {
     private gameCache;
     private mode;
     constructor(gameCache: GameCache, mode: GameMode) {
@@ -29,34 +29,25 @@ export default class GameQueueMode extends Queue<User> {
 }
 
 export class GameQueue {
-    private gameQueueModes: {
-        [key in GameMode]?: GameQueueMode;
-    } = {};
+    private queueMap = new Map<GameMode, GameModeQueue>();
 
-    constructor(gameCache: GameCache) {
-        Object.keys(Modes)
-            .map((m) => Number(m))
-            .map((m) => {
-                const t = m as GameMode;
-                this.gameQueueModes[t] = new GameQueueMode(
-                    gameCache,
-                    m as GameMode
-                );
-            });
-    }
+    constructor(private gameCache: GameCache) {}
 
     offer(mode: GameMode, player: User) {
-        this.gameQueueModes[mode]?.offer(player);
+        this.getGameModeQueue(mode).offer(player);
     }
 
     remove(player: User) {
-        Object.keys(this.gameQueueModes).forEach((k) => {
-            const t = Number(k) as GameMode;
-            this.gameQueueModes[t]?.remove((e) => e.id === player.id);
-        });
+        this.queueMap.forEach((queue) =>
+            queue.remove((e) => e.id === player.id)
+        );
     }
 
-    getGameQueueMode(mode: GameMode) {
-        return this.gameQueueModes[mode];
+    private getGameModeQueue(mode: GameMode) {
+        if (!this.queueMap.has(mode)) {
+            this.queueMap.set(mode, new GameModeQueue(this.gameCache, mode));
+        }
+
+        return this.queueMap.get(mode)!;
     }
 }

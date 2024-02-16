@@ -2,7 +2,6 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
-import { Server as ServerHttp, createServer } from 'node:https';
 
 import {
     ClientToServerEvents,
