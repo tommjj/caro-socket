@@ -5,6 +5,7 @@ import { Players, PointState, setGameStore } from './store/store';
 import { API_HOST } from './http';
 import { GameMode } from './game-mode';
 import { IconType } from '@/components/icon';
+import { useCallback, useEffect } from 'react';
 
 export interface ServerToClientEvents {
     'chat message': (msg: string) => void;
@@ -86,6 +87,22 @@ socket.on('sync match', (data) => {
 export const connectSocket = (auth: { token: string }) => {
     socket.auth = auth;
     socket.connect();
+};
+
+export const useSocket = <
+    N extends keyof ServerToClientEvents,
+    H extends ServerToClientEvents[N]
+>(
+    name: N,
+    event: H
+) => {
+    useEffect(() => {
+        socket.on(name, event as any);
+
+        return () => {
+            socket.off(name, event as any);
+        };
+    }, [event, name]);
 };
 
 export default socket;

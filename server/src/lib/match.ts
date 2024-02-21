@@ -131,7 +131,7 @@ export default class Match {
         this.handleSetTimeout();
     }
 
-    setTimeoutById(id: string) {
+    protected setTimeoutById(id: string) {
         const playerSetTimeout =
             this.players.player1.id === id
                 ? this.players.player1.timeout
@@ -159,7 +159,7 @@ export default class Match {
         }, playerSetTimeout.TimeRemaining);
     }
 
-    clearTimeoutById(id: string) {
+    protected clearTimeoutById(id: string) {
         const playerClearTimeout =
             this.players.player1.id === id
                 ? this.players.player1.timeout
@@ -175,9 +175,7 @@ export default class Match {
         playerClearTimeout.isCount = false;
     }
 
-    toggleTimeout() {}
-
-    private handleSetTimeout() {
+    protected handleSetTimeout() {
         if (this.matchResult !== undefined) {
             this.clearTimeoutById(this.players.player1.id);
             this.clearTimeoutById(this.players.player2.id);
@@ -200,7 +198,7 @@ export default class Match {
         this.setTimeoutById(playerSetTimeoutId);
     }
 
-    canMovingHere(x: number, y: number, playerId: string) {
+    protected isOnPLayerTurn(playerId: string) {
         const player =
             this.players.player1.id === playerId
                 ? this.players.player1
@@ -214,7 +212,7 @@ export default class Match {
     }
 
     move(x: number, y: number, playerId: string) {
-        if (!this.canMovingHere(x, y, playerId)) return;
+        if (!this.isOnPLayerTurn(playerId)) return;
 
         this.caro.place(x, y);
         this.handleSetTimeout();
@@ -252,7 +250,7 @@ export default class Match {
         this.drawRequest = undefined;
     }
 
-    newRound() {
+    protected newRound() {
         this.drawRequest = undefined;
         this.caro.reset();
 
@@ -268,7 +266,7 @@ export default class Match {
         }, 700);
     }
 
-    getSyncData() {
+    protected getSyncData() {
         return {
             id: this.Id,
             players: {
@@ -311,7 +309,7 @@ export default class Match {
         this.io.to(this.Id).emit('sync match', this.getSyncData());
     }
 
-    private handleWin(playerId: string, winner: PointState) {
+    protected handleWin(playerId: string, winner: PointState) {
         this.upScore(winner);
 
         const userWon = this.getWinner();
@@ -328,8 +326,9 @@ export default class Match {
         this.newRound();
     }
 
-    private handleDraw() {
-        this.draw();
+    protected handleDraw() {
+        this.upScore(PointState.X);
+        this.upScore(PointState.O);
 
         const userWon = this.getWinner();
         const isDraw = this.isDraw();
@@ -352,12 +351,7 @@ export default class Match {
         this.newRound();
     }
 
-    draw() {
-        this.players.player1.score += 1;
-        this.players.player2.score += 1;
-    }
-
-    upScore(p: PointState) {
+    private upScore(p: PointState) {
         const player =
             this.players.player1.type === p
                 ? this.players.player1
@@ -370,14 +364,14 @@ export default class Match {
         return this.players.player1.id === id || this.players.player2.id === id;
     }
 
-    isDraw() {
+    private isDraw() {
         return (
             this.players.player1.score === this.players.player2.score &&
             this.players.player1.score > this.numberOfMatch / 2
         );
     }
 
-    getWinner() {
+    private getWinner() {
         return this.players.player1.score > this.numberOfMatch / 2
             ? this.players.player1.id
             : this.players.player2.score > this.numberOfMatch / 2

@@ -1,4 +1,12 @@
-export const Modes = {
+export type Mode = {
+    width: number;
+    height: number;
+    lengthToWin: number;
+    numberOfMatch: number;
+    timeout: number;
+};
+
+export const MODES = {
     3: {
         width: 3,
         height: 3,
@@ -27,10 +35,10 @@ export const Modes = {
         numberOfMatch: 3,
         timeout: 1000 * 60 * 10,
     },
-};
+} satisfies { [k: number]: Mode };
 
-export type GameMode = keyof typeof Modes;
+export type GameMode = keyof typeof MODES;
 
 export const getGameMode = (mode: GameMode) => {
-    return Modes[mode];
+    return MODES[mode];
 };

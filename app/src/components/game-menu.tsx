@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect } from 'react';
 
-import socket from '@/lib/socket';
+import socket, { useSocket } from '@/lib/socket';
 import { cn } from '@/lib/utils';
 import useGameStore, { setGameStore } from '@/lib/store/store';
 

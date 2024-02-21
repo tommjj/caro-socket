@@ -1,6 +1,6 @@
 import Queue from './queue';
 import GameCache from './cache';
-import { GameMode, Modes } from './game-mode';
+import { GameMode, MODES } from './game-mode';
 
 export type User = {
     id: string;

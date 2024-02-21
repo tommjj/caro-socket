@@ -54,10 +54,12 @@ export default class Caro {
         return x >= 0 && x < this.width && y >= 0 && y < this.height;
     }
 
+    canMovingHere(x: number, y: number) {
+        return this.isInBoard(x, y) || !this.isOccupied(x, y);
+    }
+
     place(x: number, y: number) {
-        if (!this.isInBoard(x, y) || this.isOccupied(x, y)) {
-            return false;
-        }
+        if (!this.canMovingHere(x, y)) return false;
 
         this.Board[x][y] = this.currentPlayer;
         this.togglePlayer();
